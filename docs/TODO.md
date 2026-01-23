@@ -1,160 +1,107 @@
-# Getting Started - Neural Network in C
+# Implementation Checklist
 
-## Prerequisites
+This checklist maps to the project requirements from TEI-S7-NN.pdf.
 
-- **C Compiler**: GCC, Clang, or MSVC
-- **CMake**: Version 3.12 or higher
-- **Git**: For version control
-- **GitLab**: For CI/CD pipeline (optional)
+## Project Requirements (Section 5)
 
-## Quick Start
+- [ ] **1. Understand gradient calculation** (dℓ/dW and dℓ/dB)
+  - Study backpropagation algorithm
+  - Implement in `optimizer.c`
 
-### 1. Build the Project
+- [ ] **2. Create network with variable layers/sizes**
+  - Implement in `network.c`: `network_create(sizes[], num_sizes)`
 
-#### On Linux/macOS:
-```bash
-cd nn
-mkdir build
-cd build
-cmake ..
-make
-```
+- [ ] **3. Inference function**
+  - Implement in `network.c`: `network_forward(net, input)`
 
-#### On Windows (with Visual Studio):
-```bash
-cd nn
-mkdir build
-cd build
-cmake ..
-cmake --build . --config Release
-```
+- [ ] **4. Quality measurement function**
+  - Implement in `metrics.c`: `evaluate_accuracy(net, dataset)`
 
-### 2. Run Tests
+- [ ] **5. Training function**
+  - Implement in `optimizer.c`: `train_epoch(net, dataset, lr)`
 
-```bash
-# From build directory
-ctest --output-on-failure
-```
+---
 
-### 3. Run Examples
+## Module Implementation Checklist
 
-```bash
-# From build directory
-./examples/simple_network
-```
+### matrix.c
+- [ ] Matrix structure definition
+- [ ] `matrix_create(rows, cols)`
+- [ ] `matrix_destroy(m)`
+- [ ] `matrix_vector_multiply(W, x, result)` - W^T * x
+- [ ] `vector_add(a, b, result)` - element-wise addition
 
-## Development Workflow
+### activation.c
+- [ ] `sigmoid(x)` - 1 / (1 + exp(-x))
+- [ ] `sigmoid_derivative(output)` - output * (1 - output)
+- [ ] `relu(x)` - max(0, x)
+- [ ] `relu_derivative(x)` - x > 0 ? 1 : 0
+- [ ] Apply activation to vector
 
-### Step 1: Implement Core Structures
+### layer.c
+- [ ] Layer structure (weights, biases, activation type)
+- [ ] `layer_create(input_size, output_size, activation)`
+- [ ] `layer_destroy(layer)`
+- [ ] `layer_forward(layer, input)` - compute z and apply activation
+- [ ] Weight initialization (Xavier or simple random)
 
-Start by implementing the basic data structures in [neuralnet.h](../include/neuralnet.h):
+### network.c
+- [ ] Network structure (array of layers)
+- [ ] `network_create(sizes[], num_sizes)`
+- [ ] `network_destroy(net)`
+- [ ] `network_forward(net, input)` - full forward pass
+- [ ] `network_predict(net, input)` - returns argmax class
 
-- Matrix structure for linear algebra operations
-- Neural network structure to hold layers and parameters
-- Memory management functions
+### loss.c
+- [ ] `one_hot(label, num_classes)` - create one-hot vector
+- [ ] `mse_loss(prediction, label)` - ||pred - onehot(label)||^2
+- [ ] `mse_gradient(prediction, label)` - 2 * (pred - onehot)
 
-### Step 2: Implement Activation Functions
+### optimizer.c (MOST IMPORTANT)
+- [ ] Store forward pass intermediate values (z, a for each layer)
+- [ ] `backpropagate(net, loss_gradient)` - compute all gradients
+- [ ] `sgd_update(net, learning_rate)` - apply gradients
+- [ ] `train_sample(net, input, label, lr)` - single sample training
+- [ ] `train_epoch(net, dataset, lr)` - train on full dataset
 
-Add activation functions in [neuralnet.c](../src/neuralnet.c):
+### mnist.c
+- [ ] Dataset structure (images, labels, count)
+- [ ] `mnist_load_image(path)` - load single PNG as float array
+- [ ] `mnist_load_dataset(base_path, split)` - load train or test set
+- [ ] `mnist_free(dataset)`
 
-- Sigmoid
-- ReLU
-- Tanh
-- Softmax
+### metrics.c
+- [ ] `calculate_accuracy(net, dataset)` - correct / total
+- [ ] Print evaluation results
 
-### Step 3: Implement Forward Propagation
+---
 
-Create the forward pass algorithm:
-1. Input → Hidden layers → Output
-2. Apply activation functions at each layer
+## Testing Checklist
 
-### Step 4: Implement Backpropagation
+- [ ] test_matrix.c - Matrix operations work correctly
+- [ ] test_activation.c - Activation functions and derivatives
+- [ ] test_network.c - Network creation and forward pass
 
-Create the backward pass:
-1. Calculate output error
-2. Propagate error backward through layers
-3. Update weights and biases
+---
 
-### Step 5: Add Training Loop
+## Examples Checklist
 
-Implement the training algorithm:
-1. Initialize weights
-2. For each epoch:
-   - Forward propagation
-   - Calculate loss
-   - Backward propagation
-   - Update weights
+- [ ] xor_example.c - XOR problem trains successfully
+- [ ] mnist_train.c - MNIST achieves >90% accuracy
 
-### Step 6: Test Your Implementation
+---
 
-Write tests in [test_basic.c](../tests/test_basic.c):
-- Test matrix operations
-- Test activation functions
-- Test forward propagation
-- Test backpropagation
-- Test full training loop
+## Verification
 
-### Step 7: Create Examples
+### XOR Test
+After implementing all modules, XOR should work:
+- Network: [2, 4, 1]
+- Learning rate: 0.5
+- Epochs: 10000
+- Expected: All 4 XOR cases correct
 
-Build practical examples in `examples/`:
-- XOR problem
-- Simple classification
-- Regression task
-
-## GitLab CI/CD Setup
-
-### 1. Push to GitLab
-
-```bash
-git init
-git add .
-git commit -m "Initial neural network project structure"
-git remote add origin <your-gitlab-repo-url>
-git push -u origin main
-```
-
-### 2. Pipeline Execution
-
-The pipeline will automatically:
-- Build the project on each commit
-- Run all tests
-- Create deployment artifacts on main branch
-
-### 3. View Pipeline
-
-- Go to your GitLab repository
-- Navigate to CI/CD → Pipelines
-- View build logs and test results
-
-## Debugging Tips
-
-### Enable Debug Build
-
-```bash
-cmake -DCMAKE_BUILD_TYPE=Debug ..
-```
-
-### Use Valgrind (Linux)
-
-```bash
-valgrind --leak-check=full ./tests/test_basic
-```
-
-### Use GDB
-
-```bash
-gdb ./tests/test_basic
-```
-
-## Next Steps
-
-1. Read [IMPLEMENTATION_GUIDE.md](IMPLEMENTATION_GUIDE.md) for detailed implementation steps
-2. Refer to [API_REFERENCE.md](API_REFERENCE.md) for function signatures
-3. Check [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md) for organization details
-
-## Resources
-
-- **Deep Learning Book**: https://www.deeplearningbook.org/
-- **Neural Networks from Scratch**: https://nnfs.io/
-- **CMake Tutorial**: https://cmake.org/cmake/help/latest/guide/tutorial/
-- **GitLab CI/CD Docs**: https://docs.gitlab.com/ee/ci/
+### MNIST Test
+- Network: [784, 128, 10]
+- Learning rate: 0.01
+- Epochs: 10
+- Expected: >95% test accuracy

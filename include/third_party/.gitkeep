@@ -1,0 +1,6 @@
+# This directory is for third-party single-header libraries
+#
+# Required:
+# - stb_image.h - Download from: https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
+#
+# After downloading, place stb_image.h in this directory.

@@ -4,6 +4,13 @@ project(NeuralNetwork C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+# Compiler warnings for better code quality
+if(MSVC)
+    add_compile_options(/W4)
+else()
+    add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
+
 # Options
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
@@ -11,12 +18,38 @@ option(BUILD_EXAMPLES "Build examples" ON)
 # Include directories
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
-# Source files
-file(GLOB_RECURSE SOURCES "src/*.c")
-file(GLOB_RECURSE HEADERS "include/*.h")
+# Source files - all modules
+set(SOURCES
+    src/matrix.c
+    src/activation.c
+    src/layer.c
+    src/network.c
+    src/loss.c
+    src/optimizer.c
+    src/mnist.c
+    src/metrics.c
+)
 
-# Create library
+# Header files
+set(HEADERS
+    include/neuralnet.h
+    include/nn/matrix.h
+    include/nn/activation.h
+    include/nn/layer.h
+    include/nn/network.h
+    include/nn/loss.h
+    include/nn/optimizer.h
+    include/nn/mnist.h
+    include/nn/metrics.h
+)
+
+# Create static library
 add_library(neuralnet STATIC ${SOURCES} ${HEADERS})
+
+# Link math library on Unix
+if(UNIX)
+    target_link_libraries(neuralnet m)
+endif()
 
 # Examples
 if(BUILD_EXAMPLES)
@@ -31,4 +64,4 @@ endif()
 
 # Installation
 install(TARGETS neuralnet DESTINATION lib)
-install(FILES ${HEADERS} DESTINATION include/neuralnet)
+install(DIRECTORY include/ DESTINATION include)
