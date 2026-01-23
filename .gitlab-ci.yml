@@ -1,0 +1,54 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  BUILD_DIR: "build"
+
+# Build stage
+build:
+  stage: build
+  image: gcc:latest
+  before_script:
+    - apt-get update && apt-get install -y cmake
+  script:
+    - mkdir -p ${BUILD_DIR}
+    - cd ${BUILD_DIR}
+    - cmake ..
+    - cmake --build .
+  artifacts:
+    paths:
+      - ${BUILD_DIR}/
+    expire_in: 1 hour
+  tags:
+    - docker
+
+# Test stage
+test:
+  stage: test
+  image: gcc:latest
+  dependencies:
+    - build
+  script:
+    - cd ${BUILD_DIR}
+    - ctest --output-on-failure
+  tags:
+    - docker
+
+deploy:
+  stage: deploy
+  image: gcc:latest
+  dependencies:
+    - build
+  script:
+    - cd ${BUILD_DIR}
+    - cmake --install . --prefix ../install
+  artifacts:
+    paths:
+      - install/
+  only:
+    - main
+    - tags
+  tags:
+    - docker
