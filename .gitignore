@@ -1,4 +1,5 @@
 # Build directories
+/clean_pngtest
 /build/
 /cmake-build-*/
 /out/

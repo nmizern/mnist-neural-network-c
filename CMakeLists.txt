@@ -22,12 +22,9 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 set(SOURCES
     src/matrix.c
     src/activation.c
-    src/layer.c
     src/network.c
     src/loss.c
-    src/optimizer.c
     src/mnist.c
-    src/metrics.c
 )
 
 # Header files
@@ -35,12 +32,9 @@ set(HEADERS
     include/neuralnet.h
     include/nn/matrix.h
     include/nn/activation.h
-    include/nn/layer.h
     include/nn/network.h
-    include/nn/loss.h
-    include/nn/optimizer.h
+    include/nn/nn_functions.h
     include/nn/mnist.h
-    include/nn/metrics.h
 )
 
 # Create static library

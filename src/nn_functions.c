@@ -23,7 +23,7 @@
  *   relu'(x) = x > 0 ? 1 : 0
  */
 
-#include "nn/activation.h"
+#include "nn/nn_functions.h"
 #include <math.h>
 
 /* TODO: Implement activation functions */

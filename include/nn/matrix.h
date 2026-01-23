@@ -32,6 +32,14 @@
 
 #include <stddef.h>
 
+// Cette structure de matrice sera utilisé pour definir les matrices
+struct Matrice
+{
+    size_t rows;
+    size_t cols;
+    float *data;
+};
+
 /* TODO: Define Matrix structure */
 
 /* TODO: Matrix creation and destruction functions */
