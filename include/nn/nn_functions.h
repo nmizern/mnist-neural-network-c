@@ -33,8 +33,12 @@
 #include <stddef.h>
 
 /* TODO: Define activation function type enum (SIGMOID, RELU, etc.) */
+void nn_activation_forward(/* parameters */);
+void nn_activation_derivative(/* parameters */);
 
 /* TODO: Forward activation functions */
+void nn_activation_forward(/* parameters */);
+void nn_activation_derivative(/* parameters */);
 /* Apply activation to entire vector in-place or to output */
 
 /* TODO: Derivative functions for backpropagation */

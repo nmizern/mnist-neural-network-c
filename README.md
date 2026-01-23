@@ -11,14 +11,14 @@ Implement a neural network from scratch in C (using only standard libraries) tha
 1. Create networks with variable number of layers and sizes
 2. Perform inference (forward propagation)
 3. Train using backpropagation and SGD
-4. Classify MNIST handwritten digits
+4. Classify and test and create the structure for a CNN neural network for the MNIST handwritten digits
 
+We use only standard libraries, but this also includes a library in loading pngs for mnist in particular
 ## Quick Start
 
 ### Prerequisites
-
 - C compiler (GCC, Clang, or MSVC)
-- CMake 3.12+
+- CMake 3.12+ (At least 3.5)
 
 ### Build
 
@@ -59,14 +59,10 @@ nn/
 ├── include/
 │   ├── neuralnet.h         # Main API header
 │   └── nn/                 # Module headers
-│       ├── matrix.h        # Matrix operations
-│       ├── activation.h    # ReLU, Sigmoid
-│       ├── layer.h         # Layer structure
+│       ├── matrix.h        # Matrix & Vector operations
+│       ├── nn_functions.h  # ReLU, Sigmoid as well as optimization functions(gradient descent) and loss functions
 │       ├── network.h       # Network structure
-│       ├── loss.h          # MSE loss
-│       ├── optimizer.h     # SGD + backpropagation
-│       ├── mnist.h         # MNIST loading
-│       └── metrics.h       # Accuracy metrics
+│       └── mnist.h         # MNIST loading
 ├── src/                    # Implementations
 ├── tests/                  # Unit tests
 ├── examples/               # Usage examples
@@ -80,4 +76,4 @@ nn/
 
 ## License
 
-University project - TEI S7
+University project - Université Paris-Saclay - TEI S7

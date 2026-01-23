@@ -24,31 +24,31 @@ This checklist maps to the project requirements from TEI-S7-NN.pdf.
 
 ## Module Implementation Checklist
 
-### matrix.c
-- [ ] Matrix structure definition
-- [ ] `matrix_create(rows, cols)`
-- [ ] `matrix_destroy(m)`
-- [ ] `matrix_vector_multiply(W, x, result)` - W^T * x
-- [ ] `vector_add(a, b, result)` - element-wise addition
+### Matrix and Vectors
+- [x] Matrix structure and Vectors definition
+- [x] `matrix_create(rows, cols)`
+- [x] `matrix_destroy(m)`
+- [x] `matrix_vector_multiply(W, x, result)` - W^T * x
+- [x] `vector_add(a, b, result)` - element-wise addition
 
-### activation.c
+### Activation
 - [ ] `sigmoid(x)` - 1 / (1 + exp(-x))
 - [ ] `sigmoid_derivative(output)` - output * (1 - output)
 - [ ] `relu(x)` - max(0, x)
 - [ ] `relu_derivative(x)` - x > 0 ? 1 : 0
 - [ ] Apply activation to vector
 
-### layer.c
+### Layers
 - [ ] Layer structure (weights, biases, activation type)
 - [ ] `layer_create(input_size, output_size, activation)`
 - [ ] `layer_destroy(layer)`
 - [ ] `layer_forward(layer, input)` - compute z and apply activation
 - [ ] Weight initialization (Xavier or simple random)
 
-### network.c
-- [ ] Network structure (array of layers)
-- [ ] `network_create(sizes[], num_sizes)`
-- [ ] `network_destroy(net)`
+### Network Structure
+- [X] Network structure (array of layers)
+- [X] `network_create(sizes[], num_sizes)`
+- [X] `network_destroy(net)`
 - [ ] `network_forward(net, input)` - full forward pass
 - [ ] `network_predict(net, input)` - returns argmax class
 
@@ -69,16 +69,11 @@ This checklist maps to the project requirements from TEI-S7-NN.pdf.
 - [ ] `mnist_load_image(path)` - load single PNG as float array
 - [ ] `mnist_load_dataset(base_path, split)` - load train or test set
 - [ ] `mnist_free(dataset)`
-
-### metrics.c
-- [ ] `calculate_accuracy(net, dataset)` - correct / total
-- [ ] Print evaluation results
-
 ---
 
 ## Testing Checklist
 
-- [ ] test_matrix.c - Matrix operations work correctly
+- [x] test_matrix.c - Matrix operations work correctly
 - [ ] test_activation.c - Activation functions and derivatives
 - [ ] test_network.c - Network creation and forward pass
 
@@ -88,20 +83,3 @@ This checklist maps to the project requirements from TEI-S7-NN.pdf.
 
 - [ ] xor_example.c - XOR problem trains successfully
 - [ ] mnist_train.c - MNIST achieves >90% accuracy
-
----
-
-## Verification
-
-### XOR Test
-After implementing all modules, XOR should work:
-- Network: [2, 4, 1]
-- Learning rate: 0.5
-- Epochs: 10000
-- Expected: All 4 XOR cases correct
-
-### MNIST Test
-- Network: [784, 128, 10]
-- Learning rate: 0.01
-- Epochs: 10
-- Expected: >95% test accuracy

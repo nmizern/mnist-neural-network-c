@@ -1,26 +1,4 @@
-/**
- * @file test_matrix.c
- * @brief Unit tests for matrix operations
- *
- * Test the fundamental matrix operations that everything else depends on.
- *
- * TESTS TO IMPLEMENT:
- * 1. Matrix creation and destruction (no memory leaks)
- * 2. Matrix-vector multiplication correctness
- * 3. Element-wise addition
- * 4. Edge cases (empty matrix, single element, etc.)
- *
- * EXAMPLE TEST:
- * Matrix W = 2x3:
- *   [1, 2, 3]
- *   [4, 5, 6]
- *
- * Vector x = [1, 2]:
- *
- * W^T * x should give [1*1+4*2, 2*1+5*2, 3*1+6*2] = [9, 12, 15]
- */
-
-#include "neuralnet.h"
+#include "nn/matrix.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -34,30 +12,26 @@ static int float_eq(float a, float b, float epsilon) {
 int main(void) {
     printf("Running matrix tests...\n");
 
-    /* TODO: Implement matrix tests
-     *
-     * Example structure:
-     *
-     * // Test 1: Create and destroy
-     * {
-     *     Matrix *m = matrix_create(3, 4);
-     *     assert(m != NULL);
-     *     assert(m->rows == 3);
-     *     assert(m->cols == 4);
-     *     matrix_destroy(m);
-     *     printf("  [PASS] Matrix create/destroy\n");
-     * }
-     *
-     * // Test 2: Matrix-vector multiplication
-     * {
-     *     // Create 2x3 matrix
-     *     // Create 2-element vector
-     *     // Multiply and check result
-     *     printf("  [PASS] Matrix-vector multiplication\n");
-     * }
-     */
+    Matrix *m = create_matrix(2, 3);
+    assert(m != NULL);
+    assert(m->rows == 2);
+    assert(m->cols == 3);
+    printf("  [PASS] Matrix create/destroy\n");
 
-    printf("TODO: Implement matrix tests\n");
+    Vector *v1 = create_vector(2);
+    Vector *v2 = create_vector(2);
+    v1->data[0] = 1.0f;
+    v1->data[1] = 2.0f;
+    v2->data[0] = 3.0f;
+    v2->data[1] = 4.0f;
+    Vector *result = create_vector(2);
+    mat_vec_mul(m, v1, result);
+    assert(float_eq(result->data[0], 11.0f, 1e-6));
+    assert(float_eq(result->data[1], 10.0f, 1e-6));
+    free_matrix(m);
+    free_vector(v1);
+    free_vector(v2);
+
     printf("All matrix tests passed!\n");
     return 0;
 }

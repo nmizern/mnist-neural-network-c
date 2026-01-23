@@ -1,59 +1,27 @@
-/**
- * @file network.h
- * @brief Neural network structure and high-level operations
- *
- * This module defines the complete neural network as a sequence of layers
- * and provides high-level operations for inference and training.
- *
- * REQUIRED FUNCTIONALITY (from project PDF section 5):
- *
- * 1. Network creation with variable number of layers and sizes
- *    - Input: array of layer sizes, e.g., [784, 128, 64, 10]
- *    - Creates layers with appropriate dimensions
- *
- * 2. Network inference (forward propagation)
- *    - Input: image vector (784 elements for MNIST)
- *    - Output: class probabilities (10 elements)
- *    - Applies each layer sequentially
- *
- * 3. Network training (backpropagation + SGD)
- *    - Updates weights and biases based on loss gradient
- *    - See optimizer.h for SGD implementation
- *
- * 4. Network destruction (free all memory)
- *
- * NETWORK STRUCTURE:
- * - Array of Layer pointers
- * - Number of layers
- * - Layer sizes array (for reference)
- *
- * INFERENCE FLOW (from PDF equation 5):
- *   y_hat = argmax(sigma(W_2^T * sigma(W_1^T * sigma(W_0^T * x + B_0) + B_1) + B_2))
- *
- * For MNIST:
- * - Input layer: 784 neurons (28x28 pixels)
- * - Hidden layers: your choice (e.g., 128, 64)
- * - Output layer: 10 neurons (digits 0-9)
- */
-
 #ifndef NN_NETWORK_H
 #define NN_NETWORK_H
 
 #include <stddef.h>
-#include "layer.h"
+#include "matrix.h"
+#include "nn_functions.h"
 
-/* TODO: Define Network structure */
+typedef struct {
+    size_t num_layers;      // Number of layers
+    size_t *layer_sizes;    // Array of layer sizes
+    Matrix **layers;        // Array of pointers to layers
+} Network;
 
-/* TODO: Network creation from layer sizes array */
-/* Example: nn_network_create([784, 128, 10], 3) creates 2-layer network */
+Network* nn_network_create(const size_t *layer_sizes, size_t num_layers);
+void nn_network_free(Network *network);
 
-/* TODO: Network destruction */
+void nn_network_forward(const Network *network, const Vector *input, Vector *output);
+void nn_network_backward(Network *network, const Vector *input, const Vector *target, float learning_rate);
+void nn_network_predict(const Network *network, const Vector *input, size_t *predicted_class);
 
-/* TODO: Forward propagation (inference) */
-/* Returns output vector, class = argmax(output) */
-
-/* TODO: Predict function - returns predicted class (0-9) */
-
-/* TODO: Save/load network weights (optional but useful) */
+void nn_network_save(const Network *network, const char *filepath);
+void nn_network_load(Network *network, const char *filepath);
+void nn_network_copy(Network *dest, const Network *src);
+void nn_network_print(const Network *network);
+void nn_network_zero_gradients(Network *network);
 
 #endif /* NN_NETWORK_H */

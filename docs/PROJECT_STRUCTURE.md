@@ -5,6 +5,8 @@
 ```
 nn/
 ├── CMakeLists.txt              # Main CMake configuration
+├── README.md                   # Project readme
+├── TEI-S7-NN.pdf               # Reference documentation
 ├── .gitlab-ci.yml              # GitLab CI/CD pipeline
 ├── .gitignore                  # Git ignore rules
 │
@@ -12,25 +14,17 @@ nn/
 │   ├── neuralnet.h             # Main public API (includes all modules)
 │   ├── nn/                     # Module headers
 │   │   ├── matrix.h            # Matrix/vector operations
-│   │   ├── activation.h        # Activation functions (ReLU, Sigmoid)
-│   │   ├── layer.h             # Single layer structure
 │   │   ├── network.h           # Network structure and operations
-│   │   ├── loss.h              # Loss functions (MSE)
-│   │   ├── optimizer.h         # Training algorithms (SGD, backprop)
-│   │   ├── mnist.h             # MNIST dataset loading
-│   │   └── metrics.h           # Evaluation metrics (accuracy)
+│   │   ├── nn_functions.h      # Activation functions (ReLU, Sigmoid)
+│   │   └── mnist.h             # MNIST dataset loading
 │   └── third_party/            # Third-party headers
-│       └── stb_image.h         # PNG loading (download separately)
+│       └── .gitkeep            # Placeholder (stb_image.h to be downloaded)
 │
 ├── src/                        # Source implementation files
 │   ├── matrix.c                # Matrix operations
-│   ├── activation.c            # Activation functions
-│   ├── layer.c                 # Layer operations
 │   ├── network.c               # Network operations
-│   ├── loss.c                  # Loss functions
-│   ├── optimizer.c             # Training (SGD + backpropagation)
-│   ├── mnist.c                 # MNIST loading
-│   └── metrics.c               # Accuracy calculation
+│   ├── nn_functions.c          # Activation functions
+│   └── mnist.c                 # MNIST loading
 │
 ├── tests/                      # Unit tests
 │   ├── CMakeLists.txt          # Test configuration
@@ -42,6 +36,11 @@ nn/
 │   ├── CMakeLists.txt          # Examples configuration
 │   ├── xor_example.c           # XOR problem (simple test)
 │   └── mnist_train.c           # Full MNIST training
+│
+├── build/                      # Build directory (generated)
+│
+├── clean_pngtest/              # PNG test files
+│   └── PNG/
 │
 ├── data/                       # Dataset directory (gitignored)
 │   └── mnist-pngs/             # MNIST PNG images
@@ -55,27 +54,19 @@ nn/
 
 ### Core Modules (in implementation order)
 
-| Module | File | Description |
-|--------|------|-------------|
-| **Matrix** | `matrix.h/c` | Fundamental matrix/vector operations. Must implement first. |
-| **Activation** | `activation.h/c` | ReLU, Sigmoid and their derivatives for backprop. |
-| **Layer** | `layer.h/c` | Single fully-connected layer with weights and biases. |
-| **Network** | `network.h/c` | Complete network as sequence of layers. |
-| **Loss** | `loss.h/c` | MSE loss function and one-hot encoding. |
-| **Optimizer** | `optimizer.h/c` | **KEY MODULE**: SGD and backpropagation algorithm. |
-| **MNIST** | `mnist.h/c` | Load MNIST PNG images into memory. |
-| **Metrics** | `metrics.h/c` | Calculate classification accuracy. |
+| Module | Header | Source | Description |
+|--------|--------|--------|-------------|
+| **Matrix** | `nn/matrix.h` | `matrix.c` | Fundamental matrix/vector operations. Must implement first. |
+| **NN Functions** | `nn/nn_functions.h` | `nn_functions.c` | Activation functions: ReLU, Sigmoid and their derivatives. |
+| **Network** | `nn/network.h` | `network.c` | Complete network structure with layers, forward/backward pass. |
+| **MNIST** | `nn/mnist.h` | `mnist.c` | Load MNIST PNG images into memory. |
 
 ### Recommended Implementation Order
 
-1. `matrix.c` - Foundation for everything
-2. `activation.c` - Simple, independent functions
-3. `layer.c` - Depends on matrix and activation
-4. `network.c` - Depends on layer
-5. `loss.c` - Independent, needed for training
-6. `optimizer.c` - Most complex, depends on all above
-7. `mnist.c` - Can be done in parallel
-8. `metrics.c` - Simple, depends on network
+1. `matrix.c` - Foundation for everything (Matrix and Vector structures)
+2. `nn_functions.c` - Activation functions (Sigmoid, ReLU)
+3. `network.c` - Network creation, forward pass, backpropagation
+4. `mnist.c` - Dataset loading (can be done in parallel)
 
 ## Build Instructions
 
@@ -83,7 +74,7 @@ nn/
 
 - C compiler (GCC, Clang, or MSVC)
 - CMake 3.12+
-- stb_image.h (download from GitHub)
+- stb_image.h (download from GitHub, place in `include/third_party/`)
 
 ### Build Steps
 
