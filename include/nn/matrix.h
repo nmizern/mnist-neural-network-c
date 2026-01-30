@@ -1,30 +1,12 @@
 /**
  * @file matrix.h
- * @brief Matrix operations for neural network computations
+ * @brief Matrix structure and operations
  *
- * This module provides fundamental matrix/vector operations needed for
- * neural network forward and backward propagation.
+ * Foundation for the neural network. Used to store weights (W),
+ * biases (B), and intermediate vectors (x) at each layer.
  *
- * REQUIRED FUNCTIONALITY:
- * - Matrix structure definition (rows, cols, data pointer)
- * - Matrix creation and destruction (memory management)
- * - Matrix-vector multiplication: y = W^T * x
- * - Matrix-matrix multiplication (for batch processing, optional)
- * - Element-wise operations (addition, subtraction)
- * - Vector dot product
- * - Matrix transpose (or handle transposed access)
- *
- * MATHEMATICAL CONTEXT:
- * In the project PDF, the layer equation is:
- *   x^(k+1) = sigma(W_k^T * x^(k) + B_k)
- *
- * So you need efficient matrix-vector multiplication where W is (N_k x N_{k+1})
- * and x is (N_k x 1), resulting in (N_{k+1} x 1) output.
- *
- * MEMORY MANAGEMENT:
- * - All matrices should be allocated on heap
- * - Provide clear create/destroy functions
- * - Consider using contiguous memory for cache efficiency
+ * From PDF equation (3): x^(k+1) = sigma(W_k^T * x^(k) + B_k)
+ * You need: matrix-vector multiply, vector addition, element-wise ops.
  */
 
 #ifndef NN_MATRIX_H
@@ -32,7 +14,6 @@
 
 #include <stddef.h>
 
-// Cette structure de matrice sera utilisé pour definir les matrices
 struct Matrice
 {
     size_t rows;
@@ -40,14 +21,9 @@ struct Matrice
     float *data;
 };
 
-/* TODO: Define Matrix structure */
-
-/* TODO: Matrix creation and destruction functions */
-
-/* TODO: Matrix-vector multiplication */
-
+/* TODO: Matrix create/destroy */
+/* TODO: Matrix-vector multiplication (W^T * x) */
+/* TODO: Vector addition (z + B) */
 /* TODO: Element-wise operations */
-
-/* TODO: Utility functions (print, copy, etc.) */
 
 #endif /* NN_MATRIX_H */

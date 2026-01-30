@@ -3,7 +3,7 @@
  * @brief Full MNIST training pipeline
  *
  * This is the main example that demonstrates the complete workflow:
- * 1. Load MNIST dataset
+ * 1. Load MNIST dataset (PNG files)
  * 2. Create neural network
  * 3. Train on training set
  * 4. Evaluate on test set
@@ -11,12 +11,14 @@
  * USAGE:
  *   ./mnist_train <path_to_mnist_pngs>
  *
- * The mnist-pngs directory should have structure:
+ * The directory should have structure:
  *   mnist-pngs/
  *   ├── train/
  *   │   ├── 0/, 1/, ..., 9/
  *   └── test/
  *       ├── 0/, 1/, ..., 9/
+ *
+ * Dataset source: https://github.com/rasbt/mnist-pngs
  *
  * RECOMMENDED HYPERPARAMETERS:
  * - Network: [784, 128, 64, 10] or [784, 256, 10]
@@ -42,7 +44,10 @@ int main(int argc, char *argv[]) {
 
     if (argc < 2) {
         printf("Usage: %s <path_to_mnist_pngs>\n", argv[0]);
-        printf("Example: %s ./data/mnist-pngs\n", argv[0]);
+        printf("\nThe directory should contain:\n");
+        printf("  train/0/, train/1/, ..., train/9/\n");
+        printf("  test/0/, test/1/, ..., test/9/\n");
+        printf("\nDataset: https://github.com/rasbt/mnist-pngs\n");
         return 1;
     }
 
@@ -57,35 +62,45 @@ int main(int argc, char *argv[]) {
      * Steps:
      *
      * 1. Load training dataset
-     *    Dataset train_data = mnist_load(data_path, "train");
-     *    printf("Loaded %d training samples\n", train_data.count);
+     *    MnistDataset *train = mnist_load_dataset(data_path, "train");
+     *    if (!train) {
+     *        fprintf(stderr, "Failed to load training data\n");
+     *        return 1;
+     *    }
+     *    printf("Loaded %zu training samples\n", train->count);
      *
      * 2. Load test dataset
-     *    Dataset test_data = mnist_load(data_path, "test");
-     *    printf("Loaded %d test samples\n", test_data.count);
+     *    MnistDataset *test = mnist_load_dataset(data_path, "test");
+     *    if (!test) {
+     *        fprintf(stderr, "Failed to load test data\n");
+     *        mnist_free_dataset(train);
+     *        return 1;
+     *    }
+     *    printf("Loaded %zu test samples\n", test->count);
      *
      * 3. Create network
      *    int sizes[] = {784, 128, 10};
      *    Network *net = network_create(sizes, 3);
      *
      * 4. Training loop
-     *    float learning_rate = 0.01;
+     *    float learning_rate = 0.01f;
      *    int epochs = 10;
      *
      *    for (int epoch = 0; epoch < epochs; epoch++) {
-     *        train_epoch(net, train_data, learning_rate);
-     *        float accuracy = evaluate(net, test_data);
-     *        printf("Epoch %d: accuracy = %.2f%%\n", epoch+1, accuracy*100);
+     *        mnist_shuffle(train);  // Shuffle before each epoch
+     *        train_epoch(net, train, learning_rate);
+     *        float accuracy = calculate_accuracy(net, test);
+     *        printf("Epoch %d: accuracy = %.2f%%\n", epoch + 1, accuracy * 100);
      *    }
      *
      * 5. Final evaluation
-     *    float final_accuracy = evaluate(net, test_data);
-     *    printf("Final accuracy: %.2f%%\n", final_accuracy*100);
+     *    float final_accuracy = calculate_accuracy(net, test);
+     *    printf("\nFinal test accuracy: %.2f%%\n", final_accuracy * 100);
      *
      * 6. Cleanup
      *    network_destroy(net);
-     *    dataset_destroy(train_data);
-     *    dataset_destroy(test_data);
+     *    mnist_free_dataset(train);
+     *    mnist_free_dataset(test);
      */
 
     printf("TODO: Implement MNIST training\n");

@@ -1,13 +1,13 @@
 # Neural Network in C
 
-A fully-connected neural network library implemented in pure C for MNIST digit classification.
+A fully-connected neural network library implemented in C for MNIST digit classification.
 
 **Authors:** Mikita Mizerkin, Idirene Daris
 **Course:** TEI S7 - Neural Networks Project
 
 ## Project Goal
 
-Implement a neural network from scratch in C (using only standard libraries) that can:
+Implement a neural network from scratch in C that can:
 1. Create networks with variable number of layers and sizes
 2. Perform inference (forward propagation)
 3. Train using backpropagation and SGD
@@ -19,6 +19,20 @@ Implement a neural network from scratch in C (using only standard libraries) tha
 
 - C compiler (GCC, Clang, or MSVC)
 - CMake 3.12+
+- libpng (for PNG image loading)
+
+### Install libpng
+
+```bash
+# Ubuntu/Debian
+sudo apt-get install libpng-dev
+
+# macOS
+brew install libpng
+
+# Windows (vcpkg)
+vcpkg install libpng
+```
 
 ### Build
 
@@ -36,18 +50,12 @@ ctest --output-on-failure
 
 ### Train on MNIST
 
-1. Download MNIST PNG dataset:
+1. Clone MNIST PNG dataset:
    ```bash
    git clone https://github.com/rasbt/mnist-pngs data/mnist-pngs
    ```
 
-2. Download stb_image.h:
-   ```bash
-   curl -o include/third_party/stb_image.h \
-     https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
-   ```
-
-3. Run training:
+2. Run training:
    ```bash
    ./examples/mnist_train ../data/mnist-pngs
    ```
@@ -65,7 +73,7 @@ nn/
 │       ├── network.h       # Network structure
 │       ├── loss.h          # MSE loss
 │       ├── optimizer.h     # SGD + backpropagation
-│       ├── mnist.h         # MNIST loading
+│       ├── mnist.h         # MNIST loading (PNG)
 │       └── metrics.h       # Accuracy metrics
 ├── src/                    # Implementations
 ├── tests/                  # Unit tests
@@ -77,6 +85,11 @@ nn/
 
 - [Project Structure](docs/PROJECT_STRUCTURE.md) - Detailed structure description
 - [TODO](docs/TODO.md) - Implementation checklist
+
+## Dependencies
+
+- **Standard C libraries** (stdio.h, stdlib.h, math.h, etc.)
+- **libpng** (png.h) - for loading PNG images
 
 ## License
 

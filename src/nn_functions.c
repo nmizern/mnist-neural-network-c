@@ -1,29 +1,17 @@
 /**
- * @file activation.c
- * @brief Activation functions implementation
+ * @file nn_functions.c
+ * @brief Activation functions, loss, and their derivatives
  *
- * Implement the functions declared in nn/activation.h here.
- *
- * IMPLEMENTATION NOTES:
- *
- * Sigmoid:
- *   sigma(x) = 1.0 / (1.0 + exp(-x))
- *   - Use <math.h> for exp()
- *   - Handle overflow: for very negative x, exp(-x) is huge
- *     Clamp x to reasonable range, e.g., [-500, 500]
- *
- * Sigmoid derivative:
- *   sigma'(x) = sigma(x) * (1 - sigma(x))
- *   If you have output = sigma(x), then: derivative = output * (1 - output)
- *
- * ReLU:
- *   relu(x) = x > 0 ? x : 0
- *
- * ReLU derivative:
- *   relu'(x) = x > 0 ? 1 : 0
+ * Activation (PDF eq. 4): sigmoid(x) = 1/(1+exp(-x)), ReLU(x) = max(x,0)
+ * Loss (PDF eq. 9): l(x,y) = ||x - delta(y)||^2  (MSE)
+ * + derivatives for backpropagation
  */
 
 #include "nn/nn_functions.h"
 #include <math.h>
 
-/* TODO: Implement activation functions */
+/* TODO: Implement activation functions (sigmoid, relu + derivatives) */
+
+/* TODO: Implement one-hot encoding delta(y) */
+
+/* TODO: Implement MSE loss and its gradient */

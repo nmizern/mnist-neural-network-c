@@ -38,8 +38,3 @@ compile_commands.json
 # OS files
 .DS_Store
 Thumbs.db
-
-# Third-party libraries (download separately)
-# Keep .gitkeep but ignore actual library files
-include/third_party/*.h
-!include/third_party/.gitkeep

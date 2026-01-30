@@ -1,38 +1,28 @@
 /**
  * @file network.c
- * @brief Network operations implementation
+ * @brief Network creation, forward pass, training (SGD), and evaluation
  *
- * Implement the functions declared in nn/network.h here.
- *
- * IMPLEMENTATION NOTES:
- *
- * Network creation from sizes array:
- *   sizes = [784, 128, 64, 10]
- *   Creates 3 layers:
- *     Layer 0: 784 -> 128 (with activation)
- *     Layer 1: 128 -> 64  (with activation)
- *     Layer 2: 64 -> 10   (output layer)
- *
- *   Number of layers = len(sizes) - 1
- *
- * Forward propagation:
- *   input = x
- *   for each layer:
- *       input = layer_forward(layer, input)
- *   return input (final output)
- *
- * Prediction:
- *   output = forward(network, input)
- *   return argmax(output)  // index of maximum value
- *
- * ACTIVATION CHOICE:
- * - Hidden layers: ReLU (faster training) or Sigmoid
- * - Output layer: Often no activation or Softmax for classification
- *   With MSE loss, you can use Sigmoid on output layer
+ * Covers all 5 PDF requirements:
+ *   Req 1: Gradient computation (dl/dW, dl/dB) via backpropagation
+ *   Req 2: network_create(sizes[], num_sizes)
+ *   Req 3: network_forward / network_predict (inference)
+ *   Req 4: network_accuracy (quality measurement)
+ *   Req 5: network_train (SGD training loop)
  */
 
 #include "nn/network.h"
+#include "nn/nn_functions.h"
 #include <stdlib.h>
 #include <stdio.h>
 
-/* TODO: Implement network functions */
+/* TODO: Implement network_create / network_destroy */
+
+/* TODO: Implement network_forward (inference) */
+
+/* TODO: Implement network_predict (argmax of output) */
+
+/* TODO: Implement backpropagation (gradient computation) */
+
+/* TODO: Implement network_train (SGD training loop) */
+
+/* TODO: Implement network_accuracy (evaluate on test set) */

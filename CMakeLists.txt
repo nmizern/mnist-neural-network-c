@@ -12,18 +12,20 @@ else()
 endif()
 
 # Options
-option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
+
+# Find libpng
+find_package(PNG REQUIRED)
 
 # Include directories
 include_directories(${PROJECT_SOURCE_DIR}/include)
+include_directories(${PNG_INCLUDE_DIRS})
 
 # Source files - all modules
 set(SOURCES
     src/matrix.c
-    src/activation.c
+    src/nn_functions.c
     src/network.c
-    src/loss.c
     src/mnist.c
 )
 
@@ -31,16 +33,16 @@ set(SOURCES
 set(HEADERS
     include/neuralnet.h
     include/nn/matrix.h
-    include/nn/activation.h
-    include/nn/network.h
     include/nn/nn_functions.h
+    include/nn/network.h
     include/nn/mnist.h
 )
 
 # Create static library
 add_library(neuralnet STATIC ${SOURCES} ${HEADERS})
 
-# Link math library on Unix
+# Link libraries
+target_link_libraries(neuralnet ${PNG_LIBRARIES})
 if(UNIX)
     target_link_libraries(neuralnet m)
 endif()
@@ -50,12 +52,3 @@ if(BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
 
-# Tests
-if(BUILD_TESTS)
-    enable_testing()
-    add_subdirectory(tests)
-endif()
-
-# Installation
-install(TARGETS neuralnet DESTINATION lib)
-install(DIRECTORY include/ DESTINATION include)
