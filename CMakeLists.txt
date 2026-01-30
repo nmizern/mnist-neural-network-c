@@ -21,17 +21,14 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 # Source files - all modules
 set(SOURCES
     src/matrix.c
-    src/activation.c
+    src/nn_functions.c
     src/network.c
-    src/loss.c
     src/mnist.c
 )
 
 # Header files
 set(HEADERS
-    include/neuralnet.h
     include/nn/matrix.h
-    include/nn/activation.h
     include/nn/network.h
     include/nn/nn_functions.h
     include/nn/mnist.h

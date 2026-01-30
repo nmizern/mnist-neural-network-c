@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\daris\Documents\Saclay\ReseauDeNeurones\nn\src\matrix.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\daris\Documents\Saclay\ReseauDeNeurones\nn\src\nn_functions.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\daris\Documents\Saclay\ReseauDeNeurones\nn\src\network.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\daris\Documents\Saclay\ReseauDeNeurones\nn\src\mnist.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\daris\Documents\Saclay\ReseauDeNeurones\nn\include\nn\matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\daris\Documents\Saclay\ReseauDeNeurones\nn\include\nn\network.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\daris\Documents\Saclay\ReseauDeNeurones\nn\include\nn\nn_functions.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\daris\Documents\Saclay\ReseauDeNeurones\nn\include\nn\mnist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\daris\Documents\Saclay\ReseauDeNeurones\nn\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{189B090D-AD9E-3BBE-9434-72F2FED73F1D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{B10E9A9C-E0D2-3A16-ACFD-B80389723A59}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

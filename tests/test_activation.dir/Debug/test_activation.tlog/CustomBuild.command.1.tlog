@@ -1,0 +1,10 @@
+^C:\USERS\DARIS\DOCUMENTS\SACLAY\RESEAUDENEURONES\NN\TESTS\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Users/daris/Documents/Saclay/ReseauDeNeurones/nn -BC:/Users/daris/Documents/Saclay/ReseauDeNeurones/nn --check-stamp-file C:/Users/daris/Documents/Saclay/ReseauDeNeurones/nn/tests/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

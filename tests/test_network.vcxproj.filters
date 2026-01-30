@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\daris\Documents\Saclay\ReseauDeNeurones\nn\tests\test_network.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\daris\Documents\Saclay\ReseauDeNeurones\nn\tests\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{B10E9A9C-E0D2-3A16-ACFD-B80389723A59}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

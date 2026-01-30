@@ -1,48 +1,68 @@
-/**
- * @file activation.h
- * @brief Activation functions and their derivatives
- *
- * This module implements non-linear activation functions used in neural networks.
- * Each activation function needs both forward (for inference) and derivative
- * (for backpropagation) implementations.
- *
- * REQUIRED FUNCTIONALITY:
- * - Sigmoid: sigma(x) = 1 / (1 + e^(-x))
- *   Derivative: sigma'(x) = sigma(x) * (1 - sigma(x))
- *
- * - ReLU: relu(x) = max(0, x)
- *   Derivative: relu'(x) = 1 if x > 0, else 0
- *
- * OPTIONAL (for better performance):
- * - Softmax (for output layer in classification)
- * - Tanh
- *
- * IMPLEMENTATION NOTES:
- * - Functions should work element-wise on vectors
- * - For backpropagation, you need derivatives
- * - Consider numerical stability (e.g., sigmoid overflow for large negative x)
- *
- * MATHEMATICAL CONTEXT (from PDF):
- * The activation function sigma is applied component-wise after the linear
- * transformation: x^(k+1)[j] = sigma(w_{k,j}^T * x^(k) + b_{k,j})
- */
 
-#ifndef NN_ACTIVATION_H
-#define NN_ACTIVATION_H
 
 #include <stddef.h>
 
-/* TODO: Define activation function type enum (SIGMOID, RELU, etc.) */
-void nn_activation_forward(/* parameters */);
-void nn_activation_derivative(/* parameters */);
+#include "matrix.h"
 
-/* TODO: Forward activation functions */
-void nn_activation_forward(/* parameters */);
-void nn_activation_derivative(/* parameters */);
-/* Apply activation to entire vector in-place or to output */
+/* Loss function types */
+typedef enum {
+    LOSS_MSE,           /* Mean Squared Error */
+    LOSS_CROSS_ENTROPY  /* Cross Entropy */
+} LossType;
 
-/* TODO: Derivative functions for backpropagation */
-/* Note: sigmoid derivative can be computed from output: sigma'(x) = sigma(x)*(1-sigma(x)) */
-/* ReLU derivative needs original input to check if x > 0 */
+typedef enum {
+    ACTIVATION_SIGMOID,
+    ACTIVATION_RELU,
+    ACTIVATION_TANH,
+    ACTIVATION_SOFTMAX
+} ActivationType;
 
-#endif /* NN_ACTIVATION_H */
+typedef enum {
+    OPTIMIZER_SGD,
+    OPTIMIZER_ADAM
+} OptimizerType;
+
+typedef struct {
+    float learning_rate;
+    float momentum;
+} SGDOptimizer;
+
+// 
+// Optimizers
+// 
+
+SGDOptimizer* nn_sgd_create(float learning_rate, float momentum);
+void nn_sgd_free(SGDOptimizer *opt);
+
+void nn_sgd_update(SGDOptimizer *opt, Matrix *weights, const Matrix *gradients);
+void nn_sgd_update_vector(SGDOptimizer *opt, Vector *biases, const Vector *gradients);
+
+// 
+// Loss
+// 
+// Compute loss value
+float nn_loss_mse(const Vector *predicted, const Vector *target);
+float nn_loss_cross_entropy(const Vector *predicted, const Vector *target);
+
+// Compute loss gradient for backpropagation
+void nn_loss_mse_gradient(const Vector *predicted, const Vector *target, Vector *gradient);
+void nn_loss_cross_entropy_gradient(const Vector *predicted, const Vector *target, Vector *gradient);
+
+// 
+// Activation functions
+//
+
+void nn_sigmoid(const Vector *input, Vector *output);
+void nn_relu(const Vector *input, Vector *output);
+void nn_softmax(const Vector *input, Vector *output);
+
+void nn_sigmoid_derivative(const Vector *output, Vector *result);
+void nn_relu_derivative(const Vector *input, Vector *result);
+
+// Apply activation
+void nn_activation_apply(Vector *vec, ActivationType type);
+void nn_activation_derivative(const Vector *vec, Vector *result, ActivationType type);
+
+// Metric functions
+float nn_accuracy(const size_t *predictions, const size_t *targets, size_t count);
+size_t nn_argmax(const Vector *vec);

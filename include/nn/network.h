@@ -1,10 +1,6 @@
-#ifndef NN_NETWORK_H
-#define NN_NETWORK_H
-
 #include <stddef.h>
 #include "matrix.h"
 #include "nn_functions.h"
-
 typedef struct {
     size_t num_layers;      // Number of layers
     size_t *layer_sizes;    // Array of layer sizes
@@ -23,5 +19,3 @@ void nn_network_load(Network *network, const char *filepath);
 void nn_network_copy(Network *dest, const Network *src);
 void nn_network_print(const Network *network);
 void nn_network_zero_gradients(Network *network);
-
-#endif /* NN_NETWORK_H */
