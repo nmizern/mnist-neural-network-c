@@ -1,39 +1,38 @@
-/**
- * @file network.h
- * @brief Network structure, inference, training, and evaluation
- *
- * This is the central module. It covers all 5 requirements from the PDF:
- *
- * Req 2: Create network with variable layers/sizes
- *   network_create([784, 128, 10], 3) -> network with 2 layers
- *
- * Req 3: Inference (PDF eq. 5)
- *   y_hat = argmax[ sigma(W_2^T * sigma(W_1^T * sigma(W_0^T * x + B_0) + B_1) + B_2) ]
- *
- * Req 4: Measure quality
- *   accuracy = correct_predictions / total_predictions on test set
- *
- * Req 5: Training (PDF Algorithm 1 - SGD)
- *   For each sample: forward -> loss -> backpropagation -> update weights
- *   W_k = W_k - eta * dl/dW_k
- *   B_k = B_k - eta * dl/dB_k
- *
- * Req 1: Gradient computation (dl/dW, dl/dB) is implemented
- *   inside the backpropagation part of training.
- */
-
 #ifndef NN_NETWORK_H
 #define NN_NETWORK_H
 
 #include <stddef.h>
 #include "matrix.h"
+#include "mnist.h"
 
-/* TODO: Network structure (layers with W, B, stored activations) */
-/* TODO: network_create(sizes[], num_sizes) */
-/* TODO: network_destroy(net) */
-/* TODO: network_forward(net, input) - inference */
-/* TODO: network_predict(net, input) - returns class 0-9 (argmax) */
-/* TODO: network_train(net, dataset, learning_rate, epochs) - SGD training */
-/* TODO: network_accuracy(net, dataset) - evaluate on test set */
+typedef struct {
+    matrix_t *W;        
+    float    *B;        
+    float    *z;        
+    float    *a;        
+    size_t    in_size;
+    size_t    out_size;
+} layer_t;
 
-#endif /* NN_NETWORK_H */
+
+typedef struct {
+    layer_t *layers;                            
+    size_t   num_layers;  
+    size_t  *sizes;       
+    size_t   num_sizes;
+} network_t;
+
+network_t *network_create(const size_t *sizes, size_t num_sizes);
+
+void network_destroy(network_t *net);
+
+float *network_forward(network_t *net, const float *input);
+
+int network_predict(network_t *net, const float *input);
+
+void network_train(network_t *net, mnist_dataset_t *train_data,
+                   float learning_rate, int epochs);
+
+float network_accuracy(network_t *net, mnist_dataset_t *dataset);
+
+#endif 

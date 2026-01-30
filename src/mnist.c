@@ -14,6 +14,22 @@
 #include <string.h>
 
 /* TODO: Implement mnist_load_png(filepath) - load single PNG to float array */
+mnist_dataset_t MnistLoadDataset(const char *path, char *mode) {
+    for (int label = 0; label < MNIST_NUM_CLASSES; label++) {
+        char dir_path[256];
+        snprintf(dir_path, sizeof(dir_path), "%s/%s/%d", path, mode, label);
+
+        FILE *fp = fopen(dir_path, "rb");
+        if (!fp) {
+
+            
+
+            
+        }
+
+    }
+}
+
 
 /* TODO: Implement mnist_load_dataset(base_path, "train" or "test") */
 

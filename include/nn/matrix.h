@@ -1,29 +1,22 @@
-/**
- * @file matrix.h
- * @brief Matrix structure and operations
- *
- * Foundation for the neural network. Used to store weights (W),
- * biases (B), and intermediate vectors (x) at each layer.
- *
- * From PDF equation (3): x^(k+1) = sigma(W_k^T * x^(k) + B_k)
- * You need: matrix-vector multiply, vector addition, element-wise ops.
- */
-
 #ifndef NN_MATRIX_H
 #define NN_MATRIX_H
 
 #include <stddef.h>
 
-struct Matrice
-{
+typedef struct {
     size_t rows;
     size_t cols;
-    float *data;
-};
+    float *data; 
+} matrix_t;
 
-/* TODO: Matrix create/destroy */
-/* TODO: Matrix-vector multiplication (W^T * x) */
-/* TODO: Vector addition (z + B) */
-/* TODO: Element-wise operations */
+matrix_t *matrix_create(size_t rows, size_t cols);
 
-#endif /* NN_MATRIX_H */
+void matrix_destroy(matrix_t *m);
+
+void matrix_vec_mul(const matrix_t *W, const float *x, float *result);
+
+void vector_add(const float *a, const float *b, float *result, size_t n);
+
+void matrix_random_init(matrix_t *m, float limit);
+
+#endif 
