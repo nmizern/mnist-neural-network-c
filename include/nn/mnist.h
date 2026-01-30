@@ -20,6 +20,7 @@ void mnist_free_dataset(mnist_dataset_t *dataset);
 
 void mnist_shuffle(mnist_dataset_t *dataset);
 
+//done
 size_t count_files(const char *base_path);
 
 #endif 
