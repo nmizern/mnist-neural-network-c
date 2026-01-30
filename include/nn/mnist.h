@@ -16,6 +16,8 @@ typedef struct {
 //done
 mnist_dataset_t *mnist_load_dataset(const char *base_path, const char *mode);
 
+int mnist_load_png(const char *path, float *out);
+
 void mnist_free_dataset(mnist_dataset_t *dataset);
 
 void mnist_shuffle(mnist_dataset_t *dataset);
