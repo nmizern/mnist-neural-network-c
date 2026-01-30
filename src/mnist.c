@@ -1,41 +1,41 @@
 /**
  * @file mnist.c
- * @brief MNIST dataset loading implementation
+ * @brief Implémentation du chargement du jeu de données MNIST
  *
- * Implement the functions declared in nn/mnist.h here.
+ * Implémenter les fonctions déclarées dans nn/mnist.h ici.
  *
- * RECOMMENDED APPROACH - Using stb_image.h:
+ * APPROCHE RECOMMANDÉE - Utilisation de stb_image.h :
  *
- * 1. Download stb_image.h from:
+ * 1. Télécharger stb_image.h depuis :
  *    https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
  *
- * 2. Place it in include/third_party/stb_image.h
+ * 2. Le placer dans include/third_party/stb_image.h
  *
- * 3. In ONE .c file (this one), do:
+ * 3. Dans UN fichier .c (celui-ci), faire :
  *    #define STB_IMAGE_IMPLEMENTATION
  *    #include "third_party/stb_image.h"
  *
- * 4. Usage:
+ * 4. Utilisation :
  *    int width, height, channels;
  *    unsigned char *img = stbi_load(path, &width, &height, &channels, 1);
- *    // channels=1 forces grayscale
- *    // img[i] is pixel value 0-255
- *    // Normalize: float_pixel = img[i] / 255.0f
+ *    // channels=1 force les niveaux de gris
+ *    // img[i] est la valeur du pixel 0-255
+ *    // Normaliser : float_pixel = img[i] / 255.0f
  *    stbi_image_free(img);
  *
- * DIRECTORY ITERATION:
- * - On Windows: use _findfirst/_findnext or dirent.h (if available)
- * - On Linux/macOS: use dirent.h (opendir, readdir)
- * - Cross-platform: consider generating file list externally
+ * ITÉRATION DE RÉPERTOIRE :
+ * - Sur Windows : utiliser _findfirst/_findnext ou dirent.h (si disponible)
+ * - Sur Linux/macOS : utiliser dirent.h (opendir, readdir)
+ * - Multi-plateforme : envisager de générer la liste de fichiers en externe
  *
- * SIMPLE ALTERNATIVE:
- * Generate file paths programmatically:
- *   for label 0-9:
- *       for i = 0 to count:
+ * ALTERNATIVE SIMPLE :
+ * Générer les chemins de fichiers programmatiquement :
+ *   pour label 0-9 :
+ *       pour i = 0 à count :
  *           sprintf(path, "%s/%d/%05d.png", base_path, label, i)
- *           load image
+ *           charger l'image
  *
- * Note: You need to know how many images per class or detect end-of-files.
+ * Note : Vous devez savoir combien d'images par classe ou détecter la fin des fichiers.
  */
 
 #include "nn/mnist.h"
@@ -43,8 +43,8 @@
 #include <stdio.h>
 #include <string.h>
 
-/* Uncomment after adding stb_image.h to include/third_party/ */
+/* Décommenter après avoir ajouté stb_image.h dans include/third_party/ */
 /* #define STB_IMAGE_IMPLEMENTATION */
 /* #include "third_party/stb_image.h" */
 
-/* TODO: Implement MNIST loading functions */
+/* TODO : Implémenter les fonctions de chargement MNIST */

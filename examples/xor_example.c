@@ -1,28 +1,28 @@
 /**
  * @file xor_example.c
- * @brief XOR problem - simple test for neural network
+ * @brief Problème XOR - test simple pour réseau de neurones
  *
- * The XOR problem is a classic test for neural networks.
- * It requires at least one hidden layer because XOR is not linearly separable.
+ * Le problème XOR est un test classique pour les réseaux de neurones.
+ * Il nécessite au moins une couche cachée car XOR n'est pas linéairement séparable.
  *
- * XOR Truth Table:
- *   Input    | Output
+ * Table de vérité XOR :
+ *   Entrée   | Sortie
  *   0, 0     | 0
  *   0, 1     | 1
  *   1, 0     | 1
  *   1, 1     | 0
  *
- * RECOMMENDED NETWORK:
- * - Input: 2 neurons
- * - Hidden: 4-8 neurons with Sigmoid or ReLU
- * - Output: 1 neuron with Sigmoid
+ * RÉSEAU RECOMMANDÉ :
+ * - Entrée : 2 neurones
+ * - Caché : 4-8 neurones avec Sigmoïde ou ReLU
+ * - Sortie : 1 neurone avec Sigmoïde
  *
- * This is a good first test before tackling MNIST:
- * 1. Create network with sizes [2, 4, 1]
- * 2. Train on 4 XOR samples
- * 3. Test predictions
+ * Ceci est un bon premier test avant d'aborder MNIST :
+ * 1. Créer un réseau avec les tailles [2, 4, 1]
+ * 2. Entraîner sur 4 échantillons XOR
+ * 3. Tester les prédictions
  *
- * If XOR works, your forward/backward propagation is likely correct.
+ * Si XOR fonctionne, votre propagation avant/arrière est probablement correcte.
  */
 
 #include "neuralnet.h"
@@ -33,18 +33,18 @@ int main(void) {
     printf("XOR Neural Network Example\n");
     printf("==========================\n\n");
 
-    /* TODO: Implement XOR training example
+    /* TODO : Implémenter l'exemple d'entraînement XOR
      *
-     * Steps:
-     * 1. Define XOR training data
+     * Étapes :
+     * 1. Définir les données d'entraînement XOR
      *    float inputs[4][2] = {{0,0}, {0,1}, {1,0}, {1,1}};
      *    float targets[4] = {0, 1, 1, 0};
      *
-     * 2. Create network: [2, 4, 1]
+     * 2. Créer le réseau : [2, 4, 1]
      *
-     * 3. Train for ~10000 epochs with learning_rate ~0.5
+     * 3. Entraîner pour ~10000 époques avec learning_rate ~0.5
      *
-     * 4. Test predictions and print results
+     * 4. Tester les prédictions et afficher les résultats
      */
 
     printf("TODO: Implement XOR example\n");

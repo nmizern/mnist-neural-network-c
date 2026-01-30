@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <math.h>
 
-/* Helper: check if two floats are approximately equal */
+/* Utilitaire : vérifier si deux flottants sont approximativement égaux */
 static int float_eq(float a, float b, float epsilon) {
     return fabs(a - b) < epsilon;
 }

@@ -1,29 +1,29 @@
 /**
  * @file activation.c
- * @brief Activation functions implementation
+ * @brief Implémentation des fonctions d'activation
  *
- * Implement the functions declared in nn/activation.h here.
+ * Implémenter les fonctions déclarées dans nn/activation.h ici.
  *
- * IMPLEMENTATION NOTES:
+ * NOTES D'IMPLÉMENTATION :
  *
- * Sigmoid:
+ * Sigmoïde :
  *   sigma(x) = 1.0 / (1.0 + exp(-x))
- *   - Use <math.h> for exp()
- *   - Handle overflow: for very negative x, exp(-x) is huge
- *     Clamp x to reasonable range, e.g., [-500, 500]
+ *   - Utiliser <math.h> pour exp()
+ *   - Gérer le débordement : pour x très négatif, exp(-x) est énorme
+ *     Limiter x à une plage raisonnable, par ex., [-500, 500]
  *
- * Sigmoid derivative:
+ * Dérivée de la sigmoïde :
  *   sigma'(x) = sigma(x) * (1 - sigma(x))
- *   If you have output = sigma(x), then: derivative = output * (1 - output)
+ *   Si vous avez output = sigma(x), alors : derivative = output * (1 - output)
  *
- * ReLU:
+ * ReLU :
  *   relu(x) = x > 0 ? x : 0
  *
- * ReLU derivative:
+ * Dérivée de ReLU :
  *   relu'(x) = x > 0 ? 1 : 0
  */
 
 #include "nn/nn_functions.h"
 #include <math.h>
 
-/* TODO: Implement activation functions */
+/* TODO : Implémenter les fonctions d'activation */

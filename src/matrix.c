@@ -14,7 +14,7 @@ Matrix* create_matrix(size_t rows, size_t cols) {
 Matrix* create_rndm_matrix(size_t rows, size_t cols) {
     Matrix* mat = create_matrix(rows, cols);
     for (size_t i = 0; i < rows * cols; i++) {
-        mat->data[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f; // Random values in [-1, 1]
+        mat->data[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f; // Valeurs aléatoires dans [-1, 1]
     }
     return mat;
 }
@@ -36,7 +36,7 @@ Vector* create_vector(size_t size) {
 Vector* create_rndm_vector(size_t size) {
     Vector* vec = create_vector(size);
     for (size_t i = 0; i < size; i++) {
-        vec->data[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f; // Random values in [-1, 1]
+        vec->data[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f; // Valeurs aléatoires dans [-1, 1]
     }
     return vec;
 }
