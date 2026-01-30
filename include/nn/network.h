@@ -6,9 +6,20 @@
 // Nous avons besoin d'une structure dédiée, pas juste une matrice, car
 // l'algorithme de Backpropagation nécessite de stocker les poids, gradients, et d'autres quantités
 typedef struct {
+    Matrix *weights;        // Matrice des poids W (incluant les biais via l'astuce [W|1])
+    Matrix *gradients;
+    
+    // Valeurs mises en cache pour la Backpropagation
+    Vector *input_cache;
+    Vector *output_cache;
+} Layer;
+// Je pensais qu'une structure de tensor pour le reseau directe serait plus simple, comme nous
+// l'avons discuté avec le professeur, mais pour la backpropagation on a du rajouter des vecteurs de cache
+
+typedef struct {
     size_t num_layers;      // Nombre de couches
     size_t *layer_sizes;    // Tableau des tailles de couches
-    Matrix **layers;        // Tableau de pointeurs vers les couches
+    Layer **layers;        // Tableau de pointeurs vers les couches
 } Network;
 
 Network* nn_network_create(const size_t *layer_sizes, size_t num_layers);

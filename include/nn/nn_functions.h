@@ -8,7 +8,7 @@ En C, les énumérations sont un type de données défini par l'utilisateur,
 constitué d'un ensemble de constantes entières nommées, appelées énumérateurs.
 Elles améliorent la lisibilité et la maintenabilité du code, et permettent d'avoir un système
 modulaire qui est justement ce que l'on cherche.
-.*/
+*/
 typedef enum {
     LOSS_MSE,
 } LossType;
