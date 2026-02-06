@@ -1,3 +1,6 @@
+#ifndef NN_NETWORK_H
+#define NN_NETWORK_H
+
 #include <stddef.h>
 #include "matrix.h"
 #include "nn_functions.h"
@@ -42,3 +45,5 @@ void nn_network_print(const Network *network);
 
 // Remise à zéro des gradients avant une nouvelle passe
 void nn_network_zero_gradients(Network *network);
+
+#endif // NN_NETWORK_H

@@ -1,3 +1,6 @@
+#ifndef NN_FUNCTIONS_H
+#define NN_FUNCTIONS_H
+
 #include <stddef.h>
 #include <stdlib.h>
 #include "matrix.h"
@@ -67,3 +70,5 @@ void nn_activation_derivative(const Vector *vec, Vector *result, ActivationType 
 // Fonctions de métrique
 float nn_accuracy(const size_t *predictions, const size_t *targets, size_t count);
 size_t nn_argmax(const Vector *vec);
+
+#endif // NN_FUNCTIONS_H

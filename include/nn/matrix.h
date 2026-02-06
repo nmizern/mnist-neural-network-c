@@ -1,3 +1,6 @@
+#ifndef NN_MATRIX_H
+#define NN_MATRIX_H
+
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -35,8 +38,8 @@ void free_vector(Vector* vec);
 // Multiplication matrice-vecteur
 // On multiplie la matrice mat (de taille rows x cols) avec le vecteur vec (de taille cols x 1)
 // Le résultat est stocké dans le vecteur result (de taille rows x 1)
-Vector* mat_vec_mul(const Matrix* mat, Vector* vec);
-Matrix* mat_mat_mul(const Matrix* A, const Matrix* B);
+void mat_vec_mul(const Matrix* mat, Vector* vec, Vector* result);
+void mat_mat_mul(const Matrix* A, const Matrix* B, Matrix* result);
 
 // Opérations élémentaires
 float dot_product(const Vector* v1, const Vector* v2);
@@ -51,3 +54,5 @@ void print_matrix(const Matrix* mat);
 void print_vector(const Vector* vec);
 void copy_matrix(const Matrix* src, Matrix* dest);
 void copy_vector(const Vector* src, Vector* dest);
+
+#endif // NN_MATRIX_H
