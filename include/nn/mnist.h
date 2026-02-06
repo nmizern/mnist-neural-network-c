@@ -14,15 +14,24 @@ typedef struct {
 } mnist_dataset_t;
 
 //done
-mnist_dataset_t *mnist_load_dataset(const char *base_path, const char *mode);
-
-int mnist_load_png(const char *path, float *out);
-
-void mnist_free_dataset(mnist_dataset_t *dataset);
-
-void mnist_shuffle(mnist_dataset_t *dataset);
+size_t count_files(const char *base_path);
 
 //done
-size_t count_files(const char *base_path);
+void swap_img(float *a, float *b);
+
+//done
+void swap_labels(uint8_t *a, uint8_t *b);
+
+//done 
+int mnist_load_png(const char *path, float *out);
+
+//done
+mnist_dataset_t *mnist_load_dataset(const char *base_path, const char *mode);
+
+//done
+void mnist_free_dataset(mnist_dataset_t *dataset);
+
+//done
+void mnist_shuffle(mnist_dataset_t *dataset);
 
 #endif 

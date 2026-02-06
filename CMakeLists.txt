@@ -1,4 +1,8 @@
 cmake_minimum_required(VERSION 3.12)
+
+# Disable vcpkg's automatic DLL copy (uses powershell, breaks MinGW)
+set(VCPKG_APPLOCAL_DEPS OFF CACHE BOOL "" FORCE)
+
 project(NeuralNetwork C)
 
 set(CMAKE_C_STANDARD 11)
