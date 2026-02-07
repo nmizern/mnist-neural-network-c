@@ -1,36 +1,3 @@
-/**
- * @file mnist_train.c
- * @brief Full MNIST training pipeline
- *
- * This is the main example that demonstrates the complete workflow:
- * 1. Load MNIST dataset
- * 2. Create neural network
- * 3. Train on training set
- * 4. Evaluate on test set
- *
- * USAGE:
- *   ./mnist_train <path_to_mnist_pngs>
- *
- * The mnist-pngs directory should have structure:
- *   mnist-pngs/
- *   ├── train/
- *   │   ├── 0/, 1/, ..., 9/
- *   └── test/
- *       ├── 0/, 1/, ..., 9/
- *
- * RECOMMENDED HYPERPARAMETERS:
- * - Network: [784, 128, 64, 10] or [784, 256, 10]
- * - Learning rate: 0.01 - 0.1
- * - Epochs: 5-20
- * - Hidden activation: ReLU or Sigmoid
- * - Output activation: Sigmoid (with MSE loss)
- *
- * EXPECTED RESULTS:
- * - After 5 epochs: ~90% accuracy
- * - After 10 epochs: ~95% accuracy
- * - After 20 epochs: ~97% accuracy
- */
-
 #include "neuralnet.h"
 #include <stdio.h>
 #include <stdlib.h>

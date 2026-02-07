@@ -27,6 +27,7 @@ typedef struct Vector Vector;
 
 // Création et destruction de matrice
 Matrix* create_matrix(size_t rows, size_t cols);
+Matrix* create_identity_matrix(size_t rows, size_t cols);
 Matrix* create_rndm_matrix(size_t rows, size_t cols);
 void free_matrix(Matrix* mat);
 
@@ -51,6 +52,7 @@ Matrix* transpose_matrix(const Matrix* mat);
 
 // Fonctions utilitaires (affichage, copie, etc.)
 void print_matrix(const Matrix* mat);
+void print_matrix_dimentions(const Matrix* mat);
 void print_vector(const Vector* vec);
 void copy_matrix(const Matrix* src, Matrix* dest);
 void copy_vector(const Vector* src, Vector* dest);

@@ -11,6 +11,15 @@ Matrix* create_matrix(size_t rows, size_t cols) {
     return mat;
 }
 
+Matrix* create_identity_matrix(size_t rows, size_t cols) {
+    Matrix* mat = create_matrix(rows, cols);
+    size_t min_dim = rows < cols ? rows : cols;
+    for (size_t i = 0; i < min_dim; i++) {
+        mat->data[i * cols + i] = 1.0f;
+    }
+    return mat;
+}
+
 Matrix* create_rndm_matrix(size_t rows, size_t cols) {
     Matrix* mat = create_matrix(rows, cols);
     for (size_t i = 0; i < rows * cols; i++) {
@@ -171,6 +180,10 @@ void print_vector(const Vector* vec) {
         printf("%.4f ", vec->data[i]);
     }
     printf("\n");
+}
+
+void print_matrix_dimentions(const Matrix* mat) {
+    printf("Matrix dimensions: %zu x %zu\n", mat->rows, mat->cols);
 }
 
 void copy_matrix(const Matrix* src, Matrix* dest) {

@@ -73,7 +73,46 @@ void nn_network_forward(const Network *network, const Vector *input, Vector *out
 }
 
 void nn_network_backward(Network *network, const Vector *input, const Vector *target, float learning_rate) {
+    Vector *predicted = create_vector(network->layer_sizes[network->num_layers]);
+    // Une passe avant pour calculer les activations et les mettre en cache
+    nn_network_forward(network, input, predicted);
+    
+    for (size_t i = network->num_layers; i > 0; i--) {
+        // Calculer dl/dWi pour i-ème couche par retropropagation
+        Layer *layer = network->layers[i-1];
 
+        Vector *error_moyen = create_vector(network->layer_sizes[network->num_layers]);
+        
+        // 2(x - gamma(y))
+        Vector *error = create_vector(network->layer_sizes[network->num_layers]);
+        nn_loss_mse_gradient(predicted, target, error);
+
+        for (size_t j = network->num_layers; j > i; j--) {
+
+            // calcule de a_k=W_k+1 * a_k+1
+            Layer *next_layer = network->layers[j-1];
+            Vector *temp = create_vector(next_layer->weights->cols);
+            mat_vec_mul(next_layer->weights, error, temp);
+            free_vector(error);
+            error = temp;
+
+            // calcul de la dérivée de l'activation pour la couche suivante
+            Vector *derivative = create_vector(next_layer->output_cache->size);
+            nn_activation_derivative(next_layer->output_cache, derivative, ACTIVATION_SIGMOID);
+            mat_vec_mul(next_layer->input_cache, derivative, derivative);
+
+            // element par element multiplication
+            Vector *increment = create_vector(error->size);
+            increment = multiply_vectors(error, derivative);
+            add_vectors(error_moyen, increment);
+            free_vector(derivative);
+            free_vector(increment);
+        }
+    }
+    // Mise à jour des poids
+    
+
+    free_vector(predicted);
 }
 
 /* Remise à zéro des gradients */
