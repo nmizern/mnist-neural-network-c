@@ -4,44 +4,112 @@
 
 ```
 nn/
-├── CMakeLists.txt              # Build configuration
+├── CMakeLists.txt              # Main CMake configuration
+├── README.md                   # Project readme
+├── TEI-S7-NN.pdf               # Reference documentation
 ├── .gitlab-ci.yml              # GitLab CI/CD pipeline
-├── .gitignore
+├── .gitignore                  # Git ignore rules
 │
 ├── include/                    # Header files
-│   ├── neuralnet.h             # Main header (includes all modules)
-│   └── nn/
-│       ├── matrix.h            # Matrix structure and operations
-│       ├── nn_functions.h      # Activation functions + loss
-│       ├── network.h           # Network structure, training, evaluation
-│       └── mnist.h             # MNIST dataset loading (PNG via libpng)
+│   ├── neuralnet.h             # Main public API (includes all modules)
+│   ├── nn/                     # Module headers
+│   │   ├── matrix.h            # Matrix/vector operations
+│   │   ├── network.h           # Network structure and operations
+│   │   ├── nn_functions.h      # Activation functions (ReLU, Sigmoid)
+│   │   └── mnist.h             # MNIST dataset loading
+│   └── third_party/            # Third-party headers
+│       └── .gitkeep            # Placeholder (stb_image.h to be downloaded)
 │
-├── src/                        # Implementation files
-│   ├── matrix.c
-│   ├── nn_functions.c
-│   ├── network.c
-│   └── mnist.c
+├── src/                        # Source implementation files
+│   ├── matrix.c                # Matrix operations
+│   ├── network.c               # Network operations
+│   ├── nn_functions.c          # Activation functions
+│   └── mnist.c                 # MNIST loading
 │
-├── examples/
-│   ├── CMakeLists.txt
-│   └── mnist_train.c           # Full MNIST training pipeline
+├── tests/                      # Unit tests
+│   ├── CMakeLists.txt          # Test configuration
+│   ├── test_matrix.c           # Matrix operation tests
+│   ├── test_activation.c       # Activation function tests
+│   └── test_network.c          # Network tests
+│
+├── examples/                   # Usage examples
+│   ├── CMakeLists.txt          # Examples configuration
+│   ├── xor_example.c           # XOR problem (simple test)
+│   └── mnist_train.c           # Full MNIST training
+│
+├── build/                      # Build directory (generated)
+│
+├── clean_pngtest/              # PNG test files
+│   └── PNG/
 │
 ├── data/                       # Dataset directory (gitignored)
-│   └── mnist-pngs/             # https://github.com/rasbt/mnist-pngs
-│       ├── train/0..9/
-│       └── test/0..9/
+│   └── mnist-pngs/             # MNIST PNG images
 │
-└── docs/
-    └── PROJECT_STRUCTURE.md    # This file
+└── docs/                       # Documentation
+    ├── PROJECT_STRUCTURE.md    # This file
+    └── TODO.md                 # Implementation checklist
 ```
 
-## Build
+## Module Descriptions
 
-Prerequisites: C compiler (GCC), CMake 3.12+, libpng
+### Core Modules (in implementation order)
+
+| Module | Header | Source | Description |
+|--------|--------|--------|-------------|
+| **Matrix** | `nn/matrix.h` | `matrix.c` | Fundamental matrix/vector operations. Must implement first. |
+| **NN Functions** | `nn/nn_functions.h` | `nn_functions.c` | Activation functions: ReLU, Sigmoid and their derivatives. |
+| **Network** | `nn/network.h` | `network.c` | Complete network structure with layers, forward/backward pass. |
+| **MNIST** | `nn/mnist.h` | `mnist.c` | Load MNIST PNG images into memory. |
+
+### Recommended Implementation Order
+
+1. `matrix.c` - Foundation for everything (Matrix and Vector structures)
+2. `nn_functions.c` - Activation functions (Sigmoid, ReLU)
+3. `network.c` - Network creation, forward pass, backpropagation
+4. `mnist.c` - Dataset loading (can be done in parallel)
+
+## Build Instructions
+
+### Prerequisites
+
+- C compiler (GCC, Clang, or MSVC)
+- CMake 3.12+
+- stb_image.h (download from GitHub, place in `include/third_party/`)
+
+### Build Steps
 
 ```bash
+# Create build directory
 mkdir build && cd build
+
+# Configure
 cmake ..
+
+# Build
 cmake --build .
+
+# Run tests
+ctest --output-on-failure
+
+# Run examples
+./examples/xor_example
 ./examples/mnist_train ../data/mnist-pngs
 ```
+
+### Download stb_image.h
+
+```bash
+# From project root
+curl -o include/third_party/stb_image.h \
+  https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
+```
+
+## Data Setup
+
+Download MNIST PNG dataset:
+
+```bash
+git clone https://github.com/rasbt/mnist-pngs data/mnist-pngs
+```
+
+Or place it anywhere and pass the path to `mnist_train`.

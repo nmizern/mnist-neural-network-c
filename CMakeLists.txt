@@ -16,6 +16,7 @@ else()
 endif()
 
 # Options
+option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 
 # Find libpng
@@ -55,4 +56,14 @@ endif()
 if(BUILD_EXAMPLES)
     add_subdirectory(examples)
 endif()
+
+# Tests
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+# Installation
+install(TARGETS neuralnet DESTINATION lib)
+install(DIRECTORY include/ DESTINATION include)
 

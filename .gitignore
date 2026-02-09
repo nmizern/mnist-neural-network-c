@@ -39,3 +39,8 @@ mnist-pngs/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Third-party libraries (download separately)
+# Keep .gitkeep but ignore actual library files
+include/third_party/*.h
+!include/third_party/.gitkeep

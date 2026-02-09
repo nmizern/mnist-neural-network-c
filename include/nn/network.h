@@ -3,36 +3,47 @@
 
 #include <stddef.h>
 #include "matrix.h"
-#include "mnist.h"
+#include "nn_functions.h"
+
+// Structure représentant une couche unique
+// Nous avons besoin d'une structure dédiée, pas juste une matrice, car
+// l'algorithme de Backpropagation nécessite de stocker les poids, gradients, et d'autres quantités
+typedef struct {
+    Matrix *weights;        // Matrice des poids W (incluant les biais via l'astuce [W|1])
+    Matrix *gradients;
+    
+    // Valeurs mises en cache pour la Backpropagation
+    Vector *input_cache;
+    Vector *output_cache;
+} Layer;
+// Je pensais qu'une structure de tensor pour le reseau directe serait plus simple, comme nous
+// l'avons discuté avec le professeur, mais pour la backpropagation on a du rajouter des vecteurs de cache
 
 typedef struct {
-    matrix_t *W;        
-    float    *B;        
-    float    *z;        
-    float    *a;        
-    size_t    in_size;
-    size_t    out_size;
-} layer_t;
+    size_t num_layers;      // Nombre de couches
+    size_t *layer_sizes;    // Tableau des tailles de couches
+    Layer **layers;        // Tableau de pointeurs vers les couches
+} Network;
 
+Network* nn_network_create(const size_t *layer_sizes, size_t num_layers);
+void nn_network_free(Network *network);
 
-typedef struct {
-    layer_t *layers;                            
-    size_t   num_layers;  
-    size_t  *sizes;       
-    size_t   num_sizes;
-} network_t;
+// Propagation Avant (for Training and Inference)
+void nn_network_forward(const Network *network, const Vector *input, Vector *output);
 
-network_t *network_create(const size_t *sizes, size_t num_sizes);
+// Rétropropagation (Training)
+// Calcule les gradients en remontant de la fin vers le début
+void nn_network_backward(Network *network, const Vector *input, const Vector *target, float learning_rate);
 
-void network_destroy(network_t *net);
+// Prédiction simple (Inference)
+void nn_network_predict(const Network *network, const Vector *input, size_t *predicted_class);
 
-float *network_forward(network_t *net, const float *input);
+void nn_network_save(const Network *network, const char *filepath);
+void nn_network_load(Network *network, const char *filepath);
+void nn_network_copy(Network *dest, const Network *src);
+void nn_network_print(const Network *network);
 
-int network_predict(network_t *net, const float *input);
+// Remise à zéro des gradients avant une nouvelle passe
+void nn_network_zero_gradients(Network *network);
 
-void network_train(network_t *net, mnist_dataset_t *train_data,
-                   float learning_rate, int epochs);
-
-float network_accuracy(network_t *net, mnist_dataset_t *dataset);
-
-#endif 
+#endif // NN_NETWORK_H

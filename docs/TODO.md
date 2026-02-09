@@ -1,51 +1,85 @@
 # Implementation Checklist
 
-Maps to the 5 requirements from TEI-S7-NN.pdf (Section 5).
+This checklist maps to the project requirements from TEI-S7-NN.pdf.
 
-## PDF Requirements
+## Project Requirements (Section 5)
 
-- [ ] **Req 1**: Gradient computation (dl/dW, dl/dB) — backpropagation in `network.c`
-- [ ] **Req 2**: Create network with variable layers/sizes — `network_create()` in `network.c`
-- [ ] **Req 3**: Inference function — `network_forward()` / `network_predict()` in `network.c`
-- [ ] **Req 4**: Quality measurement — `network_accuracy()` in `network.c`
-- [ ] **Req 5**: Training function (SGD) — `network_train()` in `network.c`
+- [ ] **1. Understand gradient calculation** (dℓ/dW and dℓ/dB)
+  - Study backpropagation algorithm
+  - Implement in `optimizer.c`
+
+- [ ] **2. Create network with variable layers/sizes**
+  - Implement in `network.c`: `network_create(sizes[], num_sizes)`
+
+- [ ] **3. Inference function**
+  - Implement in `network.c`: `network_forward(net, input)`
+
+- [ ] **4. Quality measurement function**
+  - Implement in `metrics.c`: `evaluate_accuracy(net, dataset)`
+
+- [ ] **5. Training function**
+  - Implement in `optimizer.c`: `train_epoch(net, dataset, lr)`
 
 ---
 
-## Module Checklist
+## Module Implementation Checklist
 
-### matrix.c
-- [ ] `matrix_create(rows, cols)` / `matrix_destroy(m)`
-- [ ] `matrix_vector_multiply(W, x, result)` — W^T * x
-- [ ] `vector_add(a, b, result)` — element-wise addition
+### Matrix and Vectors
+- [x] Matrix structure and Vectors definition
+- [x] `matrix_create(rows, cols)`
+- [x] `matrix_destroy(m)`
+- [x] `matrix_vector_multiply(W, x, result)` - W^T * x
+- [x] `vector_add(a, b, result)` - element-wise addition
 
-### nn_functions.c
-- [ ] `sigmoid(x)` / `sigmoid_derivative(output)`
-- [ ] `relu(x)` / `relu_derivative(x)`
-- [ ] `one_hot(label, num_classes)` — delta(y)
-- [ ] `mse_loss(prediction, label)` — ||pred - delta(y)||^2
-- [ ] `mse_gradient(prediction, label)` — 2*(pred - delta(y))
+### Activation
+- [ ] `sigmoid(x)` - 1 / (1 + exp(-x))
+- [ ] `sigmoid_derivative(output)` - output * (1 - output)
+- [ ] `relu(x)` - max(0, x)
+- [ ] `relu_derivative(x)` - x > 0 ? 1 : 0
+- [ ] Apply activation to vector
 
-### network.c
-- [ ] Network structure (layers with W, B, stored activations)
-- [ ] `network_create(sizes[], num_sizes)` / `network_destroy(net)`
-- [ ] `network_forward(net, input)` — full forward pass
-- [ ] `network_predict(net, input)` — argmax of output
-- [ ] Backpropagation — compute dl/dW and dl/dB for each layer
-- [ ] `network_train(net, dataset, learning_rate, epochs)` — SGD loop
-- [ ] `network_accuracy(net, dataset)` — correct / total
+### Layers
+- [ ] Layer structure (weights, biases, activation type)
+- [ ] `layer_create(input_size, output_size, activation)`
+- [ ] `layer_destroy(layer)`
+- [ ] `layer_forward(layer, input)` - compute z and apply activation
+- [ ] Weight initialization (Xavier or simple random)
+
+### Network Structure
+- [X] Network structure (array of layers)
+- [X] `network_create(sizes[], num_sizes)`
+- [X] `network_destroy(net)`
+- [ ] `network_forward(net, input)` - full forward pass
+- [ ] `network_predict(net, input)` - returns argmax class
+
+### loss.c
+- [ ] `one_hot(label, num_classes)` - create one-hot vector
+- [ ] `mse_loss(prediction, label)` - ||pred - onehot(label)||^2
+- [ ] `mse_gradient(prediction, label)` - 2 * (pred - onehot)
+
+### optimizer.c (MOST IMPORTANT)
+- [ ] Store forward pass intermediate values (z, a for each layer)
+- [ ] `backpropagate(net, loss_gradient)` - compute all gradients
+- [ ] `sgd_update(net, learning_rate)` - apply gradients
+- [ ] `train_sample(net, input, label, lr)` - single sample training
+- [ ] `train_epoch(net, dataset, lr)` - train on full dataset
 
 ### mnist.c
-- [ ] `mnist_load_png(filepath)` — single PNG to float[784]
-- [ ] `mnist_load_dataset(base_path, "train"/"test")` — load all images
-- [ ] `mnist_free_dataset(dataset)`
-- [ ] `mnist_shuffle(dataset)` — Fisher-Yates shuffle
+- [ ] Dataset structure (images, labels, count)
+- [ ] `mnist_load_image(path)` - load single PNG as float array
+- [ ] `mnist_load_dataset(base_path, split)` - load train or test set
+- [ ] `mnist_free(dataset)`
+---
+
+## Testing Checklist
+
+- [x] test_matrix.c - Matrix operations work correctly
+- [ ] test_activation.c - Activation functions and derivatives
+- [ ] test_network.c - Network creation and forward pass
 
 ---
 
-## Verification
+## Examples Checklist
 
-- Network: [784, 128, 10]
-- Learning rate: 0.01
-- Epochs: 10
-- Expected: >95% test accuracy
+- [ ] xor_example.c - XOR problem trains successfully
+- [ ] mnist_train.c - MNIST achieves >90% accuracy
