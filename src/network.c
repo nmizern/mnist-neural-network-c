@@ -140,3 +140,24 @@ void nn_network_print(const Network *network) {
         printf("    Layer %zu: %zu neurons\n", i, network->layer_sizes[i]);
     }
 }
+
+float nn_network_evaluate(const Network *network, const mnist_dataset_t *dataset) {
+    size_t correct = 0;
+    for (size_t i = 0; i < dataset->count; i++) {
+        Vector *input = create_vector(784);
+        for (size_t j = 0; j < 784; j++) {
+            input->data[j] = dataset->images[i * 784 + j];
+        }
+
+        size_t predicted_class;
+        nn_network_predict(network, input, &predicted_class);
+
+        if (predicted_class == dataset->labels[i]) {
+            correct++;
+        }
+
+        free_vector(input);
+    }
+
+    return (float)correct / (float)dataset->count;
+}

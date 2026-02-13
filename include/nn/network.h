@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include "matrix.h"
 #include "nn_functions.h"
+#include "mnist.h"
 
 // Structure représentant une couche unique
 // Nous avons besoin d'une structure dédiée, pas juste une matrice, car
@@ -45,5 +46,7 @@ void nn_network_print(const Network *network);
 
 // Remise à zéro des gradients avant une nouvelle passe
 void nn_network_zero_gradients(Network *network);
+
+float nn_network_evaluate(const Network *network, const mnist_dataset_t *dataset);
 
 #endif // NN_NETWORK_H
