@@ -270,3 +270,23 @@ float nn_network_evaluate(const Network *network, const mnist_dataset_t *dataset
 
     return (float)correct / (float)dataset->count;
 }
+
+void nn_network_train(Network *network, mnist_dataset_t *train_data, float learning_rate, int epochs) {
+    for (int i = 0; i < epochs; i++) {
+        mnist_shuffle(train_data);
+        for (size_t j = 0; j < train_data->count; j++) {
+            Vector *input = create_vector(784);
+            for (size_t k = 0; k < 784; k++) {
+                input->data[k] = train_data->images[j * 784 + k];
+            }
+
+            Vector *target = create_vector(1);
+            target->data[0] = train_data->labels[j];
+
+            nn_network_backward(network, input, target, learning_rate);
+            free_vector(input);
+            free_vector(target);
+        }
+        printf("Epoch %d/%d complete\n", i+1, epochs);
+    }
+}

@@ -6,7 +6,7 @@
 #include <dirent.h>
 #include <time.h>
 
-size_t count_files(const char *path) {
+static size_t count_files(const char *path) {
     DIR *dir = opendir(path);
     if (!dir) {
         return 0;
@@ -24,13 +24,13 @@ size_t count_files(const char *path) {
     return count;
 }
 
-void swap_img(float *a, float *b) {
+static void swap_img(float *a, float *b) {
     float temp = *a;
     *a = *b;
     *b = temp;
 }
 
-void swap_labels(uint8_t *a, uint8_t *b) {
+static void swap_labels(uint8_t *a, uint8_t *b) {
     uint8_t temp = *a;
     *a = *b;
     *b = temp;

@@ -49,4 +49,6 @@ void nn_network_zero_gradients(Network *network);
 
 float nn_network_evaluate(const Network *network, const mnist_dataset_t *dataset);
 
+void nn_network_train(Network *network, mnist_dataset_t *train_data, float learning_rate, int epochs);
+
 #endif // NN_NETWORK_H
