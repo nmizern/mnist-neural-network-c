@@ -16,9 +16,7 @@
 
 ## Remaining Tasks
 
-## Mikita
-
-### 1. Implement `nn_network_train()`
+### Mikita - Implement `nn_network_train()` ⬅️ DO FIRST
 **File:** `src/network.c` + `include/nn/network.h`
 
 Main training loop over multiple epochs. For each epoch: shuffle dataset, iterate over all samples, call backward for each sample, optionally print progress.
@@ -27,7 +25,7 @@ Main training loop over multiple epochs. For each epoch: shuffle dataset, iterat
 
 **Note:** Since `nn_network_backward()` already does forward + gradient + weight update, you can call it directly for each sample (no need for separate train_sample).
 
-### 2. Complete `mnist_train.c`
+### Daris - Complete `mnist_train.c` ⬅️ AFTER MIKITA PUSHES
 **File:** `examples/mnist_train.c`
 
 Update the file to perform actual training:
@@ -38,16 +36,15 @@ Update the file to perform actual training:
 - Print final accuracy
 - Optionally save trained network
 
----
+## Workflow to Avoid Conflicts
 
-## Daris
-
-### 1. (Optional) Implement `nn_network_train_sample()`
-**File:** `src/network.c` + `include/nn/network.h`
-
-Wrapper around backward for training on a single sample. This is optional since `nn_network_backward()` already performs a complete training step.
-
-**Signature:** `void nn_network_train_sample(Network *network, const Vector *input, const Vector *target, float learning_rate);`
+```
+1. Mikita implements nn_network_train()
+2. Mikita pushes to main
+3. Daris does git pull
+4. Daris implements mnist_train.c
+5. Daris pushes to main
+```
 
 ---
 
@@ -56,8 +53,8 @@ Wrapper around backward for training on a single sample. This is optional since 
 | File | Mikita | Daris |
 |------|--------|-------|
 | `nn_functions.h/c` | ✅ nn_one_hot | - |
-| `network.h/c` | ✅ nn_network_evaluate, nn_network_train | ✅ nn_network_backward, save/load/copy |
-| `mnist_train.c` | Full ownership | - |
+| `network.h/c` | ✅ nn_network_evaluate, nn_network_train | ✅ nn_network_backward, save/load/copy (done) |
+| `mnist_train.c` | - | Full ownership |
 
 ## Dependency Order
 
@@ -68,7 +65,5 @@ Wrapper around backward for training on a single sample. This is optional since 
          │
          ▼
 nn_network_train() ──► mnist_train.c
-     (Mikita)            (Mikita)
+     (Mikita)            (Daris)
 ```
-
-Mikita can now implement `nn_network_train()` and complete `mnist_train.c`.
