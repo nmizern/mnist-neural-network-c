@@ -71,4 +71,6 @@ void nn_activation_derivative(const Vector *vec, Vector *result, ActivationType 
 float nn_accuracy(const size_t *predictions, const size_t *targets, size_t count);
 size_t nn_argmax(const Vector *vec);
 
+void nn_one_hot(size_t label, size_t num_classes, Vector *result);
+
 #endif // NN_FUNCTIONS_H

@@ -139,3 +139,13 @@ float nn_accuracy(const size_t *predictions, const size_t *targets, size_t count
     }
     return (float)correct / (float)count;
 }
+
+void nn_one_hot(size_t label, size_t num_classes, Vector *result) {
+    for (size_t i = 0; i < num_classes; i++) {
+        if (i == label) {
+            result->data[i] = 1.0f;
+            continue;
+        }
+        result->data[i] = 0.0f;
+    }
+}
