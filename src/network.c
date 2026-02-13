@@ -77,42 +77,83 @@ void nn_network_backward(Network *network, const Vector *input, const Vector *ta
     // Une passe avant pour calculer les activations et les mettre en cache
     nn_network_forward(network, input, predicted);
     
-    for (size_t i = network->num_layers; i > 0; i--) {
-        // Calculer dl/dWi pour i-ème couche par retropropagation
-        Layer *layer = network->layers[i-1];
 
-        Vector *error_moyen = create_vector(network->layer_sizes[network->num_layers]);
+    // Calculer l'erreur de sortie: delta = loss'(predicted, target) * activation'(output)
+    Vector *target_one_hot = create_vector(predicted->size);
+    nn_one_hot((size_t)target->data[0], predicted->size, target_one_hot);
+    Vector *delta = create_vector(predicted->size);
+    nn_loss_mse_gradient(predicted, target_one_hot, delta);
+    free_vector(target_one_hot);
+    
+    // Calcul de la dérivée de l'activation pour la dernière couche
+    Vector *activation_deriv = create_vector(predicted->size);
+    nn_activation_derivative(predicted, activation_deriv, ACTIVATION_SIGMOID);
+    
+    // Multiplication élément par élément: delta = loss' * activation'
+    for (size_t i = 0; i < delta->size; i++) {
+        delta->data[i] *= activation_deriv->data[i];
+    }
+    free_vector(activation_deriv);
+    
+    // Rétropropagation à travers chaque couche
+    for (size_t l = network->num_layers; l > 0; l--) {
+        Layer *layer = network->layers[l - 1];
         
-        // 2(x - gamma(y))
-        Vector *error = create_vector(network->layer_sizes[network->num_layers]);
-        nn_loss_mse_gradient(predicted, target, error);
-
-        for (size_t j = network->num_layers; j > i; j--) {
-
-            // calcule de a_k=W_k+1 * a_k+1
-            Layer *next_layer = network->layers[j-1];
-            Vector *temp = create_vector(next_layer->weights->cols);
-            mat_vec_mul(next_layer->weights, error, temp);
-            free_vector(error);
-            error = temp;
-
-            // calcul de la dérivée de l'activation pour la couche suivante
-            Vector *derivative = create_vector(next_layer->output_cache->size);
-            nn_activation_derivative(next_layer->output_cache, derivative, ACTIVATION_SIGMOID);
-            // TODO: fix type mismatch — input_cache is Vector*, mat_vec_mul expects Matrix*
-            // mat_vec_mul(next_layer->input_cache, derivative, derivative);
-
-            // element par element multiplication
-            Vector *increment = create_vector(error->size);
-            increment = multiply_vectors(error, derivative);
-            add_vectors(error_moyen, increment);
-            free_vector(derivative);
-            free_vector(increment);
+        // Créer le vecteur d'entrée avec biais pour le calcul du gradient
+        Vector *input_with_bias = create_vector(layer->input_cache->size + 1);
+        memcpy(input_with_bias->data, layer->input_cache->data, 
+               layer->input_cache->size * sizeof(float));
+        input_with_bias->data[layer->input_cache->size] = 1.0f;
+        
+        // Calculer le gradient pour cette couche: dW = delta * input^T
+        for (size_t i = 0; i < layer->weights->rows; i++) {
+            for (size_t j = 0; j < layer->weights->cols; j++) {
+                layer->gradients->data[i * layer->weights->cols + j] = 
+                    delta->data[i] * input_with_bias->data[j];
+            }
+        }
+        
+        // Propager l'erreur à la couche précédente (si ce n'est pas la première couche)
+        if (l > 1) {
+            // Créer le nouveau delta pour la couche précédente
+            Vector *next_delta = create_vector(layer->input_cache->size);
+            
+            // delta_{l-1} = W_l^T * delta_l (sans le biais)
+            for (size_t i = 0; i < layer->input_cache->size; i++) {
+                next_delta->data[i] = 0.0f;
+                for (size_t j = 0; j < layer->weights->rows; j++) {
+                    next_delta->data[i] += layer->weights->data[j * layer->weights->cols + i] * delta->data[j];
+                }
+            }
+            
+            // Multiplier par la dérivée de l'activation de la couche précédente
+            Vector *prev_activation_deriv = create_vector(layer->input_cache->size);
+            nn_activation_derivative(layer->input_cache, prev_activation_deriv, ACTIVATION_SIGMOID);
+            
+            for (size_t i = 0; i < next_delta->size; i++) {
+                next_delta->data[i] *= prev_activation_deriv->data[i];
+            }
+            
+            free_vector(prev_activation_deriv);
+            free_vector(delta);
+            delta = next_delta;
+        }
+        
+        free_vector(input_with_bias);
+    }
+    
+    // Mise à jour des poids: W = W - learning_rate * dW
+    for (size_t i = 0; i < network->num_layers; i++) {
+        Layer *layer = network->layers[i];
+        for (size_t r = 0; r < layer->weights->rows; r++) {
+            for (size_t c = 0; c < layer->weights->cols; c++) {
+                size_t idx = r * layer->weights->cols + c;
+                layer->weights->data[idx] -= learning_rate * layer->gradients->data[idx];
+            }
         }
     }
-    // Mise à jour des poids
-    
 
+    free_vector(delta);
     free_vector(predicted);
 }
 
@@ -130,6 +171,74 @@ void nn_network_predict(const Network *network, const Vector *input, size_t *pre
     nn_network_forward(network, input, output);
     *predicted_class = nn_argmax(output);
     free_vector(output);
+}
+
+/* Sauvegarde et chargement du réseau */
+void nn_network_save(const Network *network, const char *filepath) {
+    FILE *file = fopen(filepath, "wb");
+    if (!file) {
+        fprintf(stderr, "Failed to open file for saving: %s\n", filepath);
+        return;
+    }
+    
+    // Sauvegarder la structure du réseau
+    fwrite(&network->num_layers, sizeof(size_t), 1, file);
+    fwrite(network->layer_sizes, sizeof(size_t), network->num_layers + 1, file);
+    
+    // Sauvegarder les poids de chaque couche
+    for (size_t i = 0; i < network->num_layers; i++) {
+        Layer *layer = network->layers[i];
+        fwrite(&layer->weights->rows, sizeof(size_t), 1, file);
+        fwrite(&layer->weights->cols, sizeof(size_t), 1, file);
+        fwrite(layer->weights->data, sizeof(float), 
+               layer->weights->rows * layer->weights->cols, file);
+    }
+    
+    fclose(file);
+    printf("Network saved to %s\n", filepath);
+}
+
+void nn_network_load(Network *network, const char *filepath) {
+    FILE *file = fopen(filepath, "rb");
+    if (!file) {
+        fprintf(stderr, "Failed to open file for loading: %s\n", filepath);
+        return;
+    }
+    
+    // Charger et vérifier la structure
+    size_t num_layers;
+    fread(&num_layers, sizeof(size_t), 1, file);
+    if (num_layers != network->num_layers) {
+        fprintf(stderr, "Network structure mismatch\n");
+        fclose(file);
+        return;
+    }
+    
+    size_t *layer_sizes = (size_t*)malloc((num_layers + 1) * sizeof(size_t));
+    fread(layer_sizes, sizeof(size_t), num_layers + 1, file);
+    
+    // Charger les poids
+    for (size_t i = 0; i < network->num_layers; i++) {
+        size_t rows, cols;
+        fread(&rows, sizeof(size_t), 1, file);
+        fread(&cols, sizeof(size_t), 1, file);
+        fread(network->layers[i]->weights->data, sizeof(float), rows * cols, file);
+    }
+    
+    free(layer_sizes);
+    fclose(file);
+    printf("Network loaded from %s\n", filepath);
+}
+
+void nn_network_copy(Network *dest, const Network *src) {
+    if (dest->num_layers != src->num_layers) {
+        fprintf(stderr, "Cannot copy networks with different structures\n");
+        return;
+    }
+    
+    for (size_t i = 0; i < src->num_layers; i++) {
+        copy_matrix(src->layers[i]->weights, dest->layers[i]->weights);
+    }
 }
 
 /* Affichage du réseau */
