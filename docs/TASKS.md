@@ -5,6 +5,8 @@
 ### Mikita
 - [x] `nn_one_hot()` - One-hot encoding function (nn_functions.c)
 - [x] `nn_network_evaluate()` - Evaluate accuracy on mnist dataset (network.c)
+- [x] `nn_network_train()` - Main training loop (network.c)
+- [x] `mnist_train.c` - Full training pipeline (examples/mnist_train.c)
 
 ### Daris
 - [x] `nn_network_backward()` - Backpropagation with weight updates (network.c)
@@ -14,56 +16,69 @@
 
 ---
 
-## Remaining Tasks
+## Remaining Tasks — Performance Optimization
 
-### Mikita - Implement `nn_network_train()` ⬅️ DO FIRST
-**File:** `src/network.c` + `include/nn/network.h`
+Training currently takes ~18 minutes due to 5,400,000 malloc/free calls (15 per sample x 180,000 samples). Goal: pre-allocate all buffers once and reuse them.
 
-Main training loop over multiple epochs. For each epoch: shuffle dataset, iterate over all samples, call backward for each sample, optionally print progress.
+### Mikita — Struct changes + backward + train (DO FIRST)
 
-**Signature:** `void nn_network_train(Network *network, mnist_dataset_t *train_data, float learning_rate, int epochs);`
+#### 1. Add `bias_input` to Layer struct (`network.h`)
+Add `Vector *bias_input;` to Layer struct.
+Each layer needs an input+bias vector for matrix multiplication. Currently allocated/freed every call.
 
-**Note:** Since `nn_network_backward()` already does forward + gradient + weight update, you can call it directly for each sample (no need for separate train_sample).
+#### 2. Add workspace buffers to Network struct (`network.h`)
+Add to Network struct:
+- `Vector *work_predicted` — size = output layer
+- `Vector *work_one_hot` — size = output layer
+- `Vector *work_delta` — size = max(layer_sizes[1..n])
+- `Vector *work_prev_delta` — size = max(layer_sizes[1..n])
+- `Vector *work_act_deriv` — size = max(layer_sizes[1..n])
 
-### Daris - Complete `mnist_train.c` ⬅️ AFTER MIKITA PUSHES
-**File:** `examples/mnist_train.c`
+These replace all temporary vectors created inside backward.
 
-Update the file to perform actual training:
-- Load train/test datasets (already done)
-- Create network with chosen architecture (e.g., [784, 128, 10])
-- Call `nn_network_train()` with learning rate and epochs
-- Call `nn_network_evaluate()` on test set
-- Print final accuracy
-- Optionally save trained network
+#### 3. Allocate new buffers in `nn_network_create` (`network.c`)
+- `bias_input` per layer: size = input_size + 1
+- Find max_size = max of layer_sizes[1..n]
+- Allocate 5 workspace vectors
+
+#### 4. Free new buffers in `nn_network_free` (`network.c`)
+Free `bias_input` per layer + 5 workspace vectors.
+
+#### 5. Rewrite `nn_network_backward` — zero malloc (`network.c`)
+Use workspace buffers instead of create_vector/free_vector.
+Eliminates ~8 malloc/free per sample = 1,440,000 total.
+
+#### 6. Update `nn_network_train` — pre-allocate input/target (`network.c`)
+Create input (784) and target (1) once before loop, reuse with memcpy.
+Eliminates 2 malloc/free per sample = 360,000 total.
+
+---
+
+### Daris — Forward + evaluate (AFTER MIKITA PUSHES)
+
+#### 1. Rewrite `nn_network_forward` — zero malloc (`network.c`)
+Use `layer->input_cache` as current, `layer->bias_input` for input+bias, `layer->output_cache` as result.
+Eliminates ~5 malloc/free per call = 900,000 total.
+
+#### 2. Update `nn_network_evaluate` — pre-allocate input (`network.c`)
+Create input (784) once before loop, reuse with memcpy.
+
+#### 3. Build and test
+Verify same ~92% accuracy, measure speedup.
+
+---
 
 ## Workflow to Avoid Conflicts
 
 ```
-1. Mikita implements nn_network_train()
-2. Mikita pushes to main
-3. Daris does git pull
-4. Daris implements mnist_train.c
-5. Daris pushes to main
+1. Mikita: struct changes + backward + train → push
+2. Daris:  git pull → forward + evaluate + test → push
 ```
-
----
 
 ## File Ownership
 
 | File | Mikita | Daris |
 |------|--------|-------|
-| `nn_functions.h/c` | ✅ nn_one_hot | - |
-| `network.h/c` | ✅ nn_network_evaluate, nn_network_train | ✅ nn_network_backward, save/load/copy (done) |
-| `mnist_train.c` | - | Full ownership |
-
-## Dependency Order
-
-```
-[DONE] nn_one_hot()
-[DONE] nn_network_backward()
-[DONE] nn_network_evaluate()
-         │
-         ▼
-nn_network_train() ──► mnist_train.c
-     (Mikita)            (Daris)
-```
+| `network.h` | Layer/Network struct changes | - |
+| `network.c` | backward, train, create, free | forward, evaluate |
+| `mnist_train.c` | done | - |
