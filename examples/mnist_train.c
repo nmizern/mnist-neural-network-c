@@ -43,23 +43,16 @@ int main(int argc, char *argv[]) {
     }
     printf("Loaded %zu test samples\n", test->count);
 
-    // 3. Print first image as ASCII art
-    printf("\nFirst training image (label=%d):\n", train->labels[0]);
-    for (int y = 0; y < 28; y++) {
-        for (int x = 0; x < 28; x++) {
-            float pixel = train->images[0 * 784 + y * 28 + x];
-            if (pixel > 0.5f) printf("##");
-            else if (pixel > 0.2f) printf("..");
-            else printf("  ");
-        }
-        printf("\n");
-    }
+    const size_t layer_sizes[3] = {784, 128, 10};
+    Network *network = nn_network_create(layer_sizes, 3);
+    nn_network_print(network);
 
-    // 4. Test shuffle
-    printf("\nTesting shuffle...\n");
-    printf("Before shuffle: first label = %d\n", train->labels[0]);
-    mnist_shuffle(train);
-    printf("After shuffle: first label = %d\n", train->labels[0]);
+    nn_network_train(network, train, 0.1f, 3); 
+
+    float accuracy = nn_network_evaluate(network, test);
+    printf("test accuracy: %.2f%%\n", accuracy * 100.0f);
+
+    nn_network_free(network);
 
     // 5. Cleanup
     mnist_free_dataset(train);
