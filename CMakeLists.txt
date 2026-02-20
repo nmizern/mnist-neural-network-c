@@ -19,8 +19,17 @@ endif()
 option(BUILD_TESTS "Build tests" ON)
 option(BUILD_EXAMPLES "Build examples" ON)
 
-# Find libpng
+# Find libpng and zlib
 find_package(PNG REQUIRED)
+find_package(ZLIB REQUIRED)
+
+# On MSVC, find dirent compatibility header (not built-in on Windows)
+if(MSVC)
+    find_path(DIRENT_INCLUDE_DIR "dirent.h")
+    if(NOT DIRENT_INCLUDE_DIR)
+        message(FATAL_ERROR "dirent.h not found. Run: vcpkg install dirent:x64-windows")
+    endif()
+endif()
 
 # Include directories
 include_directories(${PROJECT_SOURCE_DIR}/include)
@@ -47,7 +56,14 @@ set(HEADERS
 add_library(neuralnet STATIC ${SOURCES} ${HEADERS})
 
 # Link libraries
-target_link_libraries(neuralnet ${PNG_LIBRARIES})
+target_include_directories(neuralnet PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    ${PNG_INCLUDE_DIRS}
+)
+if(MSVC AND DIRENT_INCLUDE_DIR)
+    target_include_directories(neuralnet PRIVATE ${DIRENT_INCLUDE_DIR})
+endif()
+target_link_libraries(neuralnet PRIVATE PNG::PNG ZLIB::ZLIB)
 if(UNIX)
     target_link_libraries(neuralnet m)
 endif()

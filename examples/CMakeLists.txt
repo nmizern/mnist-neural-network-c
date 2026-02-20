@@ -13,15 +13,13 @@ foreach(example_file ${EXAMPLE_SOURCES})
     endif()
 
     # Copy required DLLs next to executable after build (Windows + dynamic libs)
-    if(WIN32 AND PNG_LIBRARIES)
+    if(WIN32)
         add_custom_command(TARGET ${example_name} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                $<TARGET_FILE:PNG::PNG>
+                $<TARGET_RUNTIME_DLLS:${example_name}>
                 $<TARGET_FILE_DIR:${example_name}>
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                $<TARGET_FILE:ZLIB::ZLIB>
-                $<TARGET_FILE_DIR:${example_name}>
-            COMMENT "Copying libpng/zlib DLLs for ${example_name}"
+            COMMAND_EXPAND_LISTS
+            COMMENT "Copying runtime DLLs for ${example_name}"
         )
     endif()
 endforeach()

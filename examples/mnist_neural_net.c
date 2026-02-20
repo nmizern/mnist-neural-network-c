@@ -27,7 +27,7 @@ float train_epoch(Network *network, mnist_dataset_t *train_data, float learning_
         float *image = &train_data->images[i * MNIST_IMAGE_SIZE];
         uint8_t label = train_data->labels[i];
         Vector *input = create_vector(MNIST_IMAGE_SIZE);
-        mnist_load_png(image, input)
+        mnist_load_png(image, input);
         // Hint: Use nn_network_forward() and nn_network_backward()
     }
     

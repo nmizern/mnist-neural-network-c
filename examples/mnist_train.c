@@ -3,12 +3,18 @@
 #include <stdlib.h>
 #include <time.h>
 
-//ALL IS GENERATED NOW IT'S JUST FOR TEST LOADING MNIST DATASET, NOT TRAINING
+Network mnist_nn() {
+    size_t layer_sizes[] = {MNIST_IMAGE_SIZE, 128, 64, MNIST_NUM_CLASSES};
+    size_t num_layers = sizeof(layer_sizes) / sizeof(layer_sizes[0]);
+    return *nn_network_create(layer_sizes, num_layers);
+}
 
 int main(int argc, char *argv[]) {
     srand(time(NULL));
     printf("MNIST Neural Network Training\n");
     printf("==============================\n\n");
+
+    Network network = mnist_nn();
 
     if (argc < 2) {
         printf("Usage: %s <path_to_mnist_pngs>\n", argv[0]);
@@ -24,7 +30,8 @@ int main(int argc, char *argv[]) {
 
     srand((unsigned int)time(NULL));
 
-    // 1. Load training dataset
+// LOAD AND SPLIT DATASET
+
     printf("Loading training data...\n");
     mnist_dataset_t *train = mnist_load_dataset(data_path, "train");
     if (!train) {
@@ -33,7 +40,7 @@ int main(int argc, char *argv[]) {
     }
     printf("Loaded %zu training samples\n", train->count);
 
-    // 2. Load test dataset
+
     printf("Loading test data...\n");
     mnist_dataset_t *test = mnist_load_dataset(data_path, "test");
     if (!test) {
@@ -43,7 +50,6 @@ int main(int argc, char *argv[]) {
     }
     printf("Loaded %zu test samples\n", test->count);
 
-    // 3. Print first image as ASCII art
     printf("\nFirst training image (label=%d):\n", train->labels[0]);
     for (int y = 0; y < 28; y++) {
         for (int x = 0; x < 28; x++) {
@@ -55,17 +61,19 @@ int main(int argc, char *argv[]) {
         printf("\n");
     }
 
-    // 4. Test shuffle
+    
     printf("\nTesting shuffle...\n");
     printf("Before shuffle: first label = %d\n", train->labels[0]);
     mnist_shuffle(train);
     printf("After shuffle: first label = %d\n", train->labels[0]);
 
-    // 5. Cleanup
+    nn_network_train(&network, train, 0.01f, 1);
+    nn_network_print(&network);
+    float accuracy = nn_network_evaluate(&network, test);
+    printf("\nTest accuracy after 1 epoch: %.2f%%\n", accuracy * 100.0f);
+
     mnist_free_dataset(train);
     mnist_free_dataset(test);
-
-    printf("\nMNIST loading test passed!\n");
 
     return 0;
 }
