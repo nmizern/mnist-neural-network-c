@@ -6,7 +6,7 @@
 #include <dirent.h>
 #include <time.h>
 
-static size_t count_files(const char *path) {
+size_t count_files(const char *path) {
     DIR *dir = opendir(path);
     if (!dir) {
         return 0;

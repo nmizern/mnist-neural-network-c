@@ -3,8 +3,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-//ALL IS GENERATED NOW IT'S JUST FOR TEST LOADING MNIST DATASET, NOT TRAINING
-
 int main(int argc, char *argv[]) {
     srand(time(NULL));
     printf("MNIST Neural Network Training\n");
@@ -24,7 +22,6 @@ int main(int argc, char *argv[]) {
 
     srand((unsigned int)time(NULL));
 
-    // 1. Load training dataset
     printf("Loading training data...\n");
     mnist_dataset_t *train = mnist_load_dataset(data_path, "train");
     if (!train) {
@@ -33,7 +30,6 @@ int main(int argc, char *argv[]) {
     }
     printf("Loaded %zu training samples\n", train->count);
 
-    // 2. Load test dataset
     printf("Loading test data...\n");
     mnist_dataset_t *test = mnist_load_dataset(data_path, "test");
     if (!test) {
@@ -47,18 +43,14 @@ int main(int argc, char *argv[]) {
     Network *network = nn_network_create(layer_sizes, 3);
     nn_network_print(network);
 
-    nn_network_train(network, train, 0.1f, 3); 
+    nn_network_train(network, train, 0.1f, 3);
 
     float accuracy = nn_network_evaluate(network, test);
-    printf("test accuracy: %.2f%%\n", accuracy * 100.0f);
+    printf("Test accuracy: %.2f%%\n", accuracy * 100.0f);
 
     nn_network_free(network);
-
-    // 5. Cleanup
     mnist_free_dataset(train);
     mnist_free_dataset(test);
-
-    printf("\nMNIST loading test passed!\n");
 
     return 0;
 }

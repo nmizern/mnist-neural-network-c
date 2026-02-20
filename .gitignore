@@ -35,10 +35,22 @@ mnist-pngs/
 # Test results
 /results/
 *.log
+/examples
 
 # OS files
 .DS_Store
 Thumbs.db
+
+# Visual Studio Project files
+*.vcproj
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+
+# Visual Studio Solution files
+*.sln
+*.suo
+
 
 # Third-party libraries (download separately)
 # Keep .gitkeep but ignore actual library files
