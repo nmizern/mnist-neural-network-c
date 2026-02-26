@@ -20,7 +20,7 @@
 
 Training currently takes ~18 minutes due to 5,400,000 malloc/free calls (15 per sample x 180,000 samples). Goal: pre-allocate all buffers once and reuse them.
 
-### Mikita — Struct changes + backward + train (DO FIRST)
+### Mikita — Struct changes + forward (DO FIRST)
 
 #### 1. Add `bias_input` to Layer struct (`network.h`)
 Add `Vector *bias_input;` to Layer struct.
@@ -44,26 +44,26 @@ These replace all temporary vectors created inside backward.
 #### 4. Free new buffers in `nn_network_free` (`network.c`)
 Free `bias_input` per layer + 5 workspace vectors.
 
-#### 5. Rewrite `nn_network_backward` — zero malloc (`network.c`)
-Use workspace buffers instead of create_vector/free_vector.
-Eliminates ~8 malloc/free per sample = 1,440,000 total.
-
-#### 6. Update `nn_network_train` — pre-allocate input/target (`network.c`)
-Create input (784) and target (1) once before loop, reuse with memcpy.
-Eliminates 2 malloc/free per sample = 360,000 total.
-
----
-
-### Daris — Forward + evaluate (AFTER MIKITA PUSHES)
-
-#### 1. Rewrite `nn_network_forward` — zero malloc (`network.c`)
+#### 5. Rewrite `nn_network_forward` — zero malloc (`network.c`)
 Use `layer->input_cache` as current, `layer->bias_input` for input+bias, `layer->output_cache` as result.
 Eliminates ~5 malloc/free per call = 900,000 total.
 
-#### 2. Update `nn_network_evaluate` — pre-allocate input (`network.c`)
+---
+
+### Daris — Backward + train + evaluate (AFTER MIKITA PUSHES)
+
+#### 1. Rewrite `nn_network_backward` — zero malloc (`network.c`)
+Use workspace buffers instead of create_vector/free_vector.
+Eliminates ~8 malloc/free per sample = 1,440,000 total.
+
+#### 2. Update `nn_network_train` — pre-allocate input/target (`network.c`)
+Create input (784) and target (1) once before loop, reuse with memcpy.
+Eliminates 2 malloc/free per sample = 360,000 total.
+
+#### 3. Update `nn_network_evaluate` — pre-allocate input (`network.c`)
 Create input (784) once before loop, reuse with memcpy.
 
-#### 3. Build and test
+#### 4. Build and test
 Verify same ~92% accuracy, measure speedup.
 
 ---
@@ -71,8 +71,8 @@ Verify same ~92% accuracy, measure speedup.
 ## Workflow to Avoid Conflicts
 
 ```
-1. Mikita: struct changes + backward + train → push
-2. Daris:  git pull → forward + evaluate + test → push
+1. Mikita: struct changes + forward → push
+2. Daris:  git pull → backward + train + evaluate + test → push
 ```
 
 ## File Ownership
@@ -80,5 +80,5 @@ Verify same ~92% accuracy, measure speedup.
 | File | Mikita | Daris |
 |------|--------|-------|
 | `network.h` | Layer/Network struct changes | - |
-| `network.c` | backward, train, create, free | forward, evaluate |
+| `network.c` | create, free, forward | backward, train, evaluate |
 | `mnist_train.c` | done | - |
