@@ -16,6 +16,7 @@ typedef struct {
     // Valeurs mises en cache pour la Backpropagation
     Vector *input_cache;
     Vector *output_cache;
+    Vector *bias_input;
 } Layer;
 // Je pensais qu'une structure de tensor pour le reseau directe serait plus simple, comme nous
 // l'avons discuté avec le professeur, mais pour la backpropagation on a du rajouter des vecteurs de cache
@@ -24,6 +25,13 @@ typedef struct {
     size_t num_layers;      // Nombre de couches
     size_t *layer_sizes;    // Tableau des tailles de couches
     Layer **layers;        // Tableau de pointeurs vers les couches
+    
+    //avoid malloc
+    Vector *work_predicted;
+    Vector *work_one_hot;
+    Vector *work_delta;
+    Vector *work_prev_delta;
+    Vector *work_act_deriv;
 } Network;
 
 Network* nn_network_create(const size_t *layer_sizes, size_t num_layers);

@@ -20,33 +20,21 @@
 
 Training currently takes ~18 minutes due to 5,400,000 malloc/free calls (15 per sample x 180,000 samples). Goal: pre-allocate all buffers once and reuse them.
 
-### Mikita — Struct changes + forward (DO FIRST)
+### Mikita — Struct changes + forward + binary cache (DO FIRST)
 
-#### 1. Add `bias_input` to Layer struct (`network.h`)
-Add `Vector *bias_input;` to Layer struct.
-Each layer needs an input+bias vector for matrix multiplication. Currently allocated/freed every call.
+#### 1. ✅ Add `bias_input` to Layer struct (`network.h`)
+#### 2. ✅ Add workspace buffers to Network struct (`network.h`)
+#### 3. ✅ Allocate new buffers in `nn_network_create` (`network.c`)
+#### 4. ✅ Free new buffers in `nn_network_free` (`network.c`)
+#### 5. ✅ Rewrite `nn_network_forward` — zero malloc (`network.c`)
 
-#### 2. Add workspace buffers to Network struct (`network.h`)
-Add to Network struct:
-- `Vector *work_predicted` — size = output layer
-- `Vector *work_one_hot` — size = output layer
-- `Vector *work_delta` — size = max(layer_sizes[1..n])
-- `Vector *work_prev_delta` — size = max(layer_sizes[1..n])
-- `Vector *work_act_deriv` — size = max(layer_sizes[1..n])
+#### 6. Add binary cache for MNIST loading (`mnist.c` + `mnist.h`)
+Loading 70,000 PNG files takes ~8 minutes due to filesystem overhead on Windows.
+Save loaded dataset as a single `.bin` file, load from it on next run (~1 second).
 
-These replace all temporary vectors created inside backward.
-
-#### 3. Allocate new buffers in `nn_network_create` (`network.c`)
-- `bias_input` per layer: size = input_size + 1
-- Find max_size = max of layer_sizes[1..n]
-- Allocate 5 workspace vectors
-
-#### 4. Free new buffers in `nn_network_free` (`network.c`)
-Free `bias_input` per layer + 5 workspace vectors.
-
-#### 5. Rewrite `nn_network_forward` — zero malloc (`network.c`)
-Use `layer->input_cache` as current, `layer->bias_input` for input+bias, `layer->output_cache` as result.
-Eliminates ~5 malloc/free per call = 900,000 total.
+- `mnist_save_binary(dataset, path)` — save images + labels to one binary file
+- `mnist_load_binary(path)` — load dataset from binary file
+- Update `mnist_train.c` to try `.bin` first, fallback to PNG, then save `.bin`
 
 ---
 
@@ -71,7 +59,7 @@ Verify same ~92% accuracy, measure speedup.
 ## Workflow to Avoid Conflicts
 
 ```
-1. Mikita: struct changes + forward → push
+1. Mikita: struct changes + forward + binary cache → push
 2. Daris:  git pull → backward + train + evaluate + test → push
 ```
 
@@ -81,4 +69,5 @@ Verify same ~92% accuracy, measure speedup.
 |------|--------|-------|
 | `network.h` | Layer/Network struct changes | - |
 | `network.c` | create, free, forward | backward, train, evaluate |
-| `mnist_train.c` | done | - |
+| `mnist.h/c` | binary cache | - |
+| `mnist_train.c` | binary cache integration | - |

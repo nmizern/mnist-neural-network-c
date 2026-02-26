@@ -19,7 +19,22 @@ Network* nn_network_create(const size_t *layer_sizes, size_t num_layers) {
         network->layers[i]->gradients = create_matrix(layer_sizes[i+1], layer_sizes[i] + 1);
         network->layers[i]->input_cache = create_vector(layer_sizes[i]);
         network->layers[i]->output_cache = create_vector(layer_sizes[i+1]);
+        network->layers[i]->bias_input = create_vector(layer_sizes[i] + 1);
     }
+
+    size_t max_size = 0;
+    for (size_t i = 1; i < num_layers; i++) {
+        if (layer_sizes[i] > max_size) {
+            max_size = layer_sizes[i];
+        }
+    }
+
+    size_t output_size = layer_sizes[num_layers - 1];
+    network->work_predicted = create_vector(output_size);
+    network->work_one_hot = create_vector(output_size);
+    network->work_delta = create_vector(max_size);
+    network->work_prev_delta = create_vector(max_size);
+    network->work_act_deriv = create_vector(max_size);
     
     return network;
 }
@@ -33,43 +48,41 @@ void nn_network_free(Network *network) {
             free_matrix(network->layers[i]->gradients);
             free_vector(network->layers[i]->input_cache);
             free_vector(network->layers[i]->output_cache);
+            free_vector(network->layers[i]->bias_input);
             free(network->layers[i]);
         }
     }
     
+    free_vector(network->work_predicted);
+    free_vector(network->work_one_hot);
+    free_vector(network->work_delta);
+    free_vector(network->work_prev_delta);
+    free_vector(network->work_act_deriv);
+
     free(network->layers);
     free(network->layer_sizes);
     free(network);
 }
 
-/* Propagation avant */
+/* Propagation avant (zero malloc) */
 void nn_network_forward(const Network *network, const Vector *input, Vector *output) {
-    Vector *current = create_vector(input->size);
-    copy_vector(input, current);
-    
+    copy_vector(input, network->layers[0]->input_cache);
+
     for (size_t i = 0; i < network->num_layers; i++) {
         Layer *layer = network->layers[i];
-        copy_vector(current, layer->input_cache);
-        // a chaque etape on copie notre input dans le cache d'entrée de la couche pour pouvoir l'utiliser lors de la rétropropagation
-        
-        Vector *current_with_bias = create_vector(current->size + 1);
-        memcpy(current_with_bias->data, current->data, current->size * sizeof(float));
-        current_with_bias->data[current->size] = 1.0f;
-        // On ajoute un biais de 1 à la fin du vecteur d'entrée pour permettre le calcul du biais dans la multiplication matrice-vecteur
-        
-        Vector *result = create_vector(layer->weights->rows); // Vect de sortie
-        mat_vec_mul(layer->weights, current_with_bias, result);
-        
-        nn_activation_apply(result, ACTIVATION_SIGMOID);
-        
-        free_vector(current);
-        free_vector(current_with_bias);
-        current = result;
-        copy_vector(current, layer->output_cache);
+
+        memcpy(layer->bias_input->data, layer->input_cache->data, layer->input_cache->size * sizeof(float));
+        layer->bias_input->data[layer->input_cache->size] = 1.0f;
+
+        mat_vec_mul(layer->weights, layer->bias_input, layer->output_cache);
+        nn_activation_apply(layer->output_cache, ACTIVATION_SIGMOID);
+
+        if (i + 1 < network->num_layers) {
+            copy_vector(layer->output_cache, network->layers[i + 1]->input_cache);
+        }
     }
-    
-    copy_vector(current, output);
-    free_vector(current);
+
+    copy_vector(network->layers[network->num_layers - 1]->output_cache, output);
 }
 
 void nn_network_backward(Network *network, const Vector *input, const Vector *target, float learning_rate) {
