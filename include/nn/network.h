@@ -38,7 +38,7 @@ Network* nn_network_create(const size_t *layer_sizes, size_t num_layers);
 void nn_network_free(Network *network);
 
 // Propagation Avant (for Training and Inference)
-void nn_network_forward(const Network *network, const Vector *input, Vector *output);
+void nn_network_forward(const Network *network, const Vector *input);
 
 // Rétropropagation (Training)
 // Calcule les gradients en remontant de la fin vers le début

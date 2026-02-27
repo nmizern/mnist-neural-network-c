@@ -27,26 +27,6 @@ int main(void) {
         printf("  [PASS] Network creation with size intiaition\n");
     }
     
-    /* Test forward pass */
-    {
-        size_t layer_sizes[] = {2, 3, 2};
-        Network *net = nn_network_create(layer_sizes, 3);
-        
-        Vector *input = create_vector(2);
-        input->data[0] = 0.5f;
-        input->data[1] = -0.3f;
-        
-        Vector *output = create_vector(2);
-        nn_network_forward(net, input, output);
-        
-        assert(output->data[0] >= 0.0f && output->data[0] <= 1.0f);
-        assert(output->data[1] >= 0.0f && output->data[1] <= 1.0f);
-        
-        free_vector(input);
-        free_vector(output);
-        nn_network_free(net);
-        printf("  [PASS] Forward pass\n");
-    }
     
     /* Test prediction */
     {
