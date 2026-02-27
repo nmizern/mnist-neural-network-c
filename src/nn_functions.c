@@ -52,22 +52,17 @@ void nn_relu_derivative(const Vector *input, Vector *result) {
 
 /* Application des activations selon le type */
 void nn_activation_apply(Vector *vec, ActivationType type) {
-    Vector *temp = create_vector(vec->size);
-    copy_vector(vec, temp);
-    
-    switch (type) {
-        case ACTIVATION_SIGMOID:
-            nn_sigmoid(temp, vec);
-            break;
-        case ACTIVATION_RELU:
-            nn_relu(temp, vec);
-            break;
-        case ACTIVATION_SOFTMAX:
-            nn_softmax(temp, vec);
-            break;
-    }
-    
-    free_vector(temp);
+      switch (type) {
+          case ACTIVATION_SIGMOID:
+              nn_sigmoid(vec, vec);
+              break;
+          case ACTIVATION_RELU:
+              nn_relu(vec, vec);
+              break;
+          case ACTIVATION_SOFTMAX:
+              nn_softmax(vec, vec);
+              break;
+      }
 }
 
 void nn_activation_derivative(const Vector *vec, Vector *result, ActivationType type) {
