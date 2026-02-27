@@ -65,7 +65,7 @@ void nn_network_free(Network *network) {
 }
 
 /* Propagation avant (zero malloc) */
-void nn_network_forward(const Network *network, const Vector *input, Vector *output) {
+void nn_network_forward(const Network *network, const Vector *input) {
     copy_vector(input, network->layers[0]->input_cache);
 
     for (size_t i = 0; i < network->num_layers; i++) {
@@ -82,79 +82,69 @@ void nn_network_forward(const Network *network, const Vector *input, Vector *out
         }
     }
 
-    copy_vector(network->layers[network->num_layers - 1]->output_cache, output);
+    // copy_vector(network->layers[network->num_layers - 1]->output_cache);
 }
 
 void nn_network_backward(Network *network, const Vector *input, const Vector *target, float learning_rate) {
-    Vector *predicted = create_vector(network->layer_sizes[network->num_layers]);
     // Une passe avant pour calculer les activations et les mettre en cache
-    nn_network_forward(network, input, predicted);
-    
+    nn_network_forward(network, input);
 
     // Calculer l'erreur de sortie: delta = loss'(predicted, target) * activation'(output)
-    Vector *target_one_hot = create_vector(predicted->size);
-    nn_one_hot((size_t)target->data[0], predicted->size, target_one_hot);
-    Vector *delta = create_vector(predicted->size);
-    nn_loss_mse_gradient(predicted, target_one_hot, delta);
-    free_vector(target_one_hot);
-    
-    // Calcul de la dérivée de l'activation pour la dernière couche
-    Vector *activation_deriv = create_vector(predicted->size);
-    nn_activation_derivative(predicted, activation_deriv, ACTIVATION_SIGMOID);
-    
+    // Réutilisation des buffers pré-alloués: work_one_hot, work_delta, work_act_deriv
+    size_t output_size = network->layers[network->num_layers - 1]->output_cache->size;
+    nn_one_hot((size_t)target->data[0], output_size, network->work_one_hot);
+    nn_loss_mse_gradient(network->layers[network->num_layers - 1]->output_cache, network->work_one_hot, network->work_delta);
+
+    // Calcul de la dérivée de l'activation pour la dernière couche (réutilise work_act_deriv)
+    nn_activation_derivative(network->layers[network->num_layers - 1]->output_cache, network->work_act_deriv, ACTIVATION_SIGMOID);
+
     // Multiplication élément par élément: delta = loss' * activation'
-    for (size_t i = 0; i < delta->size; i++) {
-        delta->data[i] *= activation_deriv->data[i];
+    for (size_t i = 0; i < output_size; i++) {
+        network->work_delta->data[i] *= network->work_act_deriv->data[i];
     }
-    free_vector(activation_deriv);
-    
+
+    // Ping-pong entre work_delta et work_prev_delta pour éviter tout malloc dans la boucle
+    Vector *delta      = network->work_delta;
+    Vector *next_delta = network->work_prev_delta;
+
     // Rétropropagation à travers chaque couche
     for (size_t l = network->num_layers; l > 0; l--) {
         Layer *layer = network->layers[l - 1];
-        
-        // Créer le vecteur d'entrée avec biais pour le calcul du gradient
-        Vector *input_with_bias = create_vector(layer->input_cache->size + 1);
-        memcpy(input_with_bias->data, layer->input_cache->data, 
-               layer->input_cache->size * sizeof(float));
-        input_with_bias->data[layer->input_cache->size] = 1.0f;
-        
-        // Calculer le gradient pour cette couche: dW = delta * input^T
+
+        // layer->bias_input est déjà rempli par la passe avant: [input_cache | 1.0]
+        // On l'utilise directement pour le calcul du gradient: dW = delta * input^T
         for (size_t i = 0; i < layer->weights->rows; i++) {
             for (size_t j = 0; j < layer->weights->cols; j++) {
-                layer->gradients->data[i * layer->weights->cols + j] = 
-                    delta->data[i] * input_with_bias->data[j];
+                layer->gradients->data[i * layer->weights->cols + j] =
+                    delta->data[i] * layer->bias_input->data[j];
             }
         }
-        
+
         // Propager l'erreur à la couche précédente (si ce n'est pas la première couche)
         if (l > 1) {
-            // Créer le nouveau delta pour la couche précédente
-            Vector *next_delta = create_vector(layer->input_cache->size);
-            
-            // delta_{l-1} = W_l^T * delta_l (sans le biais)
-            for (size_t i = 0; i < layer->input_cache->size; i++) {
+            size_t prev_size = layer->input_cache->size;
+
+            // delta_{l-1} = W_l^T * delta_l (sans la colonne biais)
+            for (size_t i = 0; i < prev_size; i++) {
                 next_delta->data[i] = 0.0f;
                 for (size_t j = 0; j < layer->weights->rows; j++) {
                     next_delta->data[i] += layer->weights->data[j * layer->weights->cols + i] * delta->data[j];
                 }
             }
-            
-            // Multiplier par la dérivée de l'activation de la couche précédente
-            Vector *prev_activation_deriv = create_vector(layer->input_cache->size);
-            nn_activation_derivative(layer->input_cache, prev_activation_deriv, ACTIVATION_SIGMOID);
-            
-            for (size_t i = 0; i < next_delta->size; i++) {
-                next_delta->data[i] *= prev_activation_deriv->data[i];
+
+            // Multiplier par la dérivée de l'activation de la couche précédente (réutilise work_act_deriv)
+            nn_activation_derivative(layer->input_cache, network->work_act_deriv, ACTIVATION_SIGMOID);
+            for (size_t i = 0; i < prev_size; i++) {
+                next_delta->data[i] *= network->work_act_deriv->data[i];
             }
-            
-            free_vector(prev_activation_deriv);
-            free_vector(delta);
-            delta = next_delta;
+
+            // Échange des pointeurs (ping-pong), aucun malloc/free
+            Vector *tmp = delta;
+            delta       = next_delta;
+            next_delta  = tmp;
         }
-        
-        free_vector(input_with_bias);
     }
-    
+
     // Mise à jour des poids: W = W - learning_rate * dW
     for (size_t i = 0; i < network->num_layers; i++) {
         Layer *layer = network->layers[i];
@@ -165,9 +155,7 @@ void nn_network_backward(Network *network, const Vector *input, const Vector *ta
             }
         }
     }
-
-    free_vector(delta);
-    free_vector(predicted);
+    // Aucun free nécessaire
 }
 
 /* Remise à zéro des gradients */
@@ -180,10 +168,8 @@ void nn_network_zero_gradients(Network *network) {
 
 /* Prédiction */
 void nn_network_predict(const Network *network, const Vector *input, size_t *predicted_class) {
-    Vector *output = create_vector(network->layer_sizes[network->num_layers]);
-    nn_network_forward(network, input, output);
-    *predicted_class = nn_argmax(output);
-    free_vector(output);
+    nn_network_forward(network, input);
+    *predicted_class = nn_argmax(network->layers[network->num_layers - 1]->output_cache);
 }
 
 /* Sauvegarde et chargement du réseau */
