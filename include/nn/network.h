@@ -6,27 +6,22 @@
 #include "nn_functions.h"
 #include "mnist.h"
 
-// Structure représentant une couche unique
-// Nous avons besoin d'une structure dédiée, pas juste une matrice, car
-// l'algorithme de Backpropagation nécessite de stocker les poids, gradients, et d'autres quantités
+/* Structure d'une couche du réseau */
 typedef struct {
-    Matrix *weights;        // Matrice des poids W (incluant les biais via l'astuce [W|1])
-    Matrix *gradients;
-    
-    // Valeurs mises en cache pour la Backpropagation
-    Vector *input_cache;
-    Vector *output_cache;
-    Vector *bias_input;
+    Matrix *weights;        // Poids W (biais inclus via l'astuce [W|1])
+    Matrix *gradients;      // Gradients de la couche
+    Vector *input_cache;    // Entrée mise en cache pour la rétropropagation
+    Vector *output_cache;   // Sortie mise en cache
+    Vector *bias_input;     // Entrée concaténée avec le biais
 } Layer;
-// Je pensais qu'une structure de tensor pour le reseau directe serait plus simple, comme nous
-// l'avons discuté avec le professeur, mais pour la backpropagation on a du rajouter des vecteurs de cache
 
+/* Structure du réseau de neurones */
 typedef struct {
-    size_t num_layers;      // Nombre de couches
-    size_t *layer_sizes;    // Tableau des tailles de couches
-    Layer **layers;        // Tableau de pointeurs vers les couches
-    
-    //avoid malloc
+    size_t num_layers;      // Nombre de couches de poids
+    size_t *layer_sizes;    // Tailles de chaque couche
+    Layer **layers;         // Tableau de pointeurs vers les couches
+
+    // Buffers de travail pré-alloués (zéro malloc pendant l'entrainement)
     Vector *work_predicted;
     Vector *work_one_hot;
     Vector *work_delta;
@@ -34,29 +29,30 @@ typedef struct {
     Vector *work_act_deriv;
 } Network;
 
+// Création et destruction
 Network* nn_network_create(const size_t *layer_sizes, size_t num_layers);
 void nn_network_free(Network *network);
 
-// Propagation Avant (for Training and Inference)
+// Propagation avant
 void nn_network_forward(const Network *network, const Vector *input);
 
-// Rétropropagation (Training)
-// Calcule les gradients en remontant de la fin vers le début
+// Rétropropagation
 void nn_network_backward(Network *network, const Vector *input, const Vector *target, float learning_rate);
 
-// Prédiction simple (Inference)
+// Prédiction
 void nn_network_predict(const Network *network, const Vector *input, size_t *predicted_class);
 
+// Sauvegarde et chargement
 void nn_network_save(const Network *network, const char *filepath);
 void nn_network_load(Network *network, const char *filepath);
 void nn_network_copy(Network *dest, const Network *src);
 void nn_network_print(const Network *network);
 
-// Remise à zéro des gradients avant une nouvelle passe
+// Remise à zéro des gradients
 void nn_network_zero_gradients(Network *network);
 
+// Entrainement et évaluation
 float nn_network_evaluate(const Network *network, const mnist_dataset_t *dataset);
-
 void nn_network_train(Network *network, mnist_dataset_t *train_data, float learning_rate, int epochs);
 
 #endif // NN_NETWORK_H

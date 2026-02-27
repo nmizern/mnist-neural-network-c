@@ -23,7 +23,7 @@ Matrix* create_identity_matrix(size_t rows, size_t cols) {
 Matrix* create_rndm_matrix(size_t rows, size_t cols) {
     Matrix* mat = create_matrix(rows, cols);
     for (size_t i = 0; i < rows * cols; i++) {
-        mat->data[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f; // Valeurs aléatoires dans [-1, 1]
+        mat->data[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
     }
     return mat;
 }
@@ -45,7 +45,7 @@ Vector* create_vector(size_t size) {
 Vector* create_rndm_vector(size_t size) {
     Vector* vec = create_vector(size);
     for (size_t i = 0; i < size; i++) {
-        vec->data[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f; // Valeurs aléatoires dans [-1, 1]
+        vec->data[i] = ((float)rand() / RAND_MAX) * 2.0f - 1.0f;
     }
     return vec;
 }
@@ -163,7 +163,7 @@ Matrix* transpose_matrix(const Matrix* mat) {
     return result;
 }
 
-/* Fonctions utilitaires */
+/* Utilitaires */
 void print_matrix(const Matrix* mat) {
     printf("Matrix [%zu x %zu]:\n", mat->rows, mat->cols);
     for (size_t i = 0; i < mat->rows; i++) {

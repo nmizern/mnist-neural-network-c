@@ -8,11 +8,21 @@ project(NeuralNetwork C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# Compiler warnings for better code quality
+# Compiler warnings and optimizations
 if(MSVC)
     add_compile_options(/W4)
+    # Enable optimizations in Release (default in Debug is /Od which is very slow for math)
+    add_compile_options($<$<CONFIG:Release>:/O2>)
+    add_compile_options($<$<CONFIG:Release>:/fp:fast>)
+    add_compile_options($<$<CONFIG:RelWithDebInfo>:/O2>)
+    add_compile_options($<$<CONFIG:RelWithDebInfo>:/fp:fast>)
 else()
     add_compile_options(-Wall -Wextra -Wpedantic)
+    add_compile_options($<$<CONFIG:Release>:-O3>)
+    add_compile_options($<$<CONFIG:Release>:-ffast-math>)
+    add_compile_options($<$<CONFIG:Release>:-march=native>)
+    add_compile_options($<$<CONFIG:RelWithDebInfo>:-O2>)
+    add_compile_options($<$<CONFIG:RelWithDebInfo>:-ffast-math>)
 endif()
 
 # Options

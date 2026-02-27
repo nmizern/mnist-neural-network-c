@@ -9,34 +9,20 @@
 
 typedef struct {
     float   *images;
-    uint8_t *labels;                     
-    size_t   count;                 
+    uint8_t *labels;
+    size_t   count;
 } mnist_dataset_t;
 
-//done
-//size_t count_files(const char *base_path); moved static 
-
-//done
-//void swap_img(float *a, float *b); moved to static
-
-//done
-//void swap_labels(uint8_t *a, uint8_t *b);moved to static
-
-//done 
+/* Chargement depuis des images PNG */
 int mnist_load_png(const char *path, float *out);
-
-//done
 mnist_dataset_t *mnist_load_dataset(const char *base_path, const char *mode);
 
-//done
+/* Libération et mélange */
 void mnist_free_dataset(mnist_dataset_t *dataset);
-
-//done
 void mnist_shuffle(mnist_dataset_t *dataset);
 
-//for binary loading of data
+/* Chargement/sauvegarde binaire */
 int mnist_save_binary(const mnist_dataset_t *dataset, const char *path);
-
 mnist_dataset_t *mnist_load_binary(const char *path);
 
-#endif 
+#endif

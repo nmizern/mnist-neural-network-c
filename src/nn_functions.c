@@ -35,15 +35,13 @@ void nn_softmax(const Vector *input, Vector *output) {
     }
 }
 
-// Derivées des fonctions d'activations
+/* Dérivées des fonctions d'activation */
 void nn_sigmoid_derivative(const Vector *output, Vector *result) {
     for (size_t i = 0; i < output->size; i++) {
         result->data[i] = output->data[i] * (1.0f - output->data[i]);
     }
 }
-// On utilise l'expression de l'équation differentielle de la fonction sigmoïde pour calculer sa dérivée
 
-// ReLU n'as pas de dérivée continue et explicite, on utilise une approximation simple
 void nn_relu_derivative(const Vector *input, Vector *result) {
     for (size_t i = 0; i < input->size; i++) {
         result->data[i] = input->data[i] > 0.0f ? 1.0f : 0.0f;
@@ -78,8 +76,7 @@ void nn_activation_derivative(const Vector *vec, Vector *result, ActivationType 
     }
 }
 
-// Fonction de perte MSE
-// mean squared error, L2 norme (squared)
+// Fonction de perte MSE (erreur quadratique moyenne)
 float nn_loss_mse(const Vector *predicted, const Vector *target) {
     float sum = 0.0f;
     for (size_t i = 0; i < predicted->size; i++) {
