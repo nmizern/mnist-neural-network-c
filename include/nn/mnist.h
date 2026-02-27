@@ -34,4 +34,9 @@ void mnist_free_dataset(mnist_dataset_t *dataset);
 //done
 void mnist_shuffle(mnist_dataset_t *dataset);
 
+//for binary loading of data
+int mnist_save_binary(const mnist_dataset_t *dataset, const char *path);
+
+mnist_dataset_t *mnist_load_binary(const char *path);
+
 #endif 

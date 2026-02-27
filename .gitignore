@@ -30,7 +30,8 @@ compile_commands.json
 
 # Data directory (MNIST dataset is large)
 /data/
-mnist-pngs/
+/mnist-pngs/test
+/mnist-pngs/train
 
 # Test results
 /results/

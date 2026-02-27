@@ -165,3 +165,38 @@ void mnist_shuffle(mnist_dataset_t *dataset) {
         
     }
 }
+
+int mnist_save_binary(const mnist_dataset_t *dataset, const char *path) {
+    FILE *f = fopen(path, "wb");
+    if (!f) {
+        return 0;
+    }
+
+    fwrite(&dataset->count, sizeof(size_t), 1, f);
+    fwrite(dataset->images, sizeof(float), dataset->count * MNIST_IMAGE_SIZE, f);
+    fwrite(dataset->labels, sizeof(uint8_t), dataset->count, f);
+    
+    fclose(f); 
+    
+    return 1;
+}
+
+mnist_dataset_t *mnist_load_binary(const char *path) {
+    FILE *f = fopen(path, "rb");
+    if (!f) {
+        return 0;
+    }
+
+    mnist_dataset_t *dataset = malloc(sizeof(mnist_dataset_t));
+    fread(&dataset->count, sizeof(size_t), 1, f);
+    dataset->images = malloc(dataset->count * MNIST_IMAGE_SIZE * sizeof(float));
+    fread(dataset->images, sizeof(float), dataset->count * MNIST_IMAGE_SIZE, f);
+
+    dataset->labels = malloc(dataset->count * sizeof(uint8_t));
+    fread(dataset->labels, sizeof(uint8_t), dataset->count, f);
+
+    fclose(f);
+
+    return dataset;
+}
+

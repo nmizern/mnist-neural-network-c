@@ -22,22 +22,42 @@ int main(int argc, char *argv[]) {
 
     srand((unsigned int)time(NULL));
 
+    char train_bin[512];
+    snprintf(train_bin, sizeof(train_bin), "%s/train.bin", data_path);
+
     printf("Loading training data...\n");
-    mnist_dataset_t *train = mnist_load_dataset(data_path, "train");
-    if (!train) {
-        fprintf(stderr, "Failed to load training data\n");
-        return 1;
-    }
-    printf("Loaded %zu training samples\n", train->count);
+    mnist_dataset_t *train = mnist_load_binary(train_bin);
+    if (train) {
+        printf("Loaded %zu training samples from cache\n", train->count);
+    }else {
+        train = mnist_load_dataset(data_path, "train");
+        if (!train) {
+            fprintf(stderr, "Failed to load training data\n");
+            return 1;
+        }
+        printf("Loaded %zu training samples\n", train->count);
+        mnist_save_binary(train, train_bin);
+        printf("Saved training cache to %s\n", train_bin);
+   }
+
+    char test_bin[512];
+    snprintf(test_bin, sizeof(test_bin), "%s/test.bin", data_path);
 
     printf("Loading test data...\n");
-    mnist_dataset_t *test = mnist_load_dataset(data_path, "test");
-    if (!test) {
-        fprintf(stderr, "Failed to load test data\n");
-        mnist_free_dataset(train);
-        return 1;
+    mnist_dataset_t *test = mnist_load_binary(test_bin);
+    if (test) {
+       printf("Loaded %zu test samples from cache\n", test->count);
+    } else {
+       test = mnist_load_dataset(data_path, "test");
+       if (!test) {
+           fprintf(stderr, "Failed to load test data\n");
+           mnist_free_dataset(train);
+           return 1;
+     }
+        printf("Loaded %zu test samples\n", test->count);
+        mnist_save_binary(test, test_bin);
+        printf("Saved test cache to %s\n", test_bin);
     }
-    printf("Loaded %zu test samples\n", test->count);
 
     const size_t layer_sizes[3] = {784, 128, 10};
     Network *network = nn_network_create(layer_sizes, 3);
