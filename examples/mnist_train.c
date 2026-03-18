@@ -57,11 +57,11 @@ int main(int argc, char *argv[]) {
         printf("Cache de test sauvegarde dans %s\n", test_bin);
     }
 
-    const size_t layer_sizes[3] = {784, 128, 10};
-    Network *network = nn_network_create(layer_sizes, 3);
+    const size_t layer_sizes[4] = {784, 256, 128, 10};
+    Network *network = nn_network_create(layer_sizes, 4);
     nn_network_print(network);
 
-    nn_network_train(network, train, 0.1f, 3);
+    nn_network_train(network, train, 0.1f, 10);
 
     char model_bin[512];
     snprintf(model_bin, sizeof(model_bin), "%s/mnist_model.bin", data_path);
