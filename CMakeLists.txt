@@ -75,7 +75,7 @@ if(MSVC AND DIRENT_INCLUDE_DIR)
 endif()
 target_link_libraries(neuralnet PRIVATE PNG::PNG ZLIB::ZLIB)
 if(UNIX)
-    target_link_libraries(neuralnet m)
+    target_link_libraries(neuralnet PRIVATE m)
 endif()
 
 # Examples
