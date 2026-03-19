@@ -36,7 +36,8 @@ compile_commands.json
 # Test results
 /results/
 *.log
-/examples
+# Go
+web/mnist_model.bin
 
 # OS files
 .DS_Store
