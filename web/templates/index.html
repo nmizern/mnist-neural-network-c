@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNIST Digit Recognition</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            gap: 48px;
+            align-items: flex-start;
+        }
+
+        .draw-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        h1 {
+            font-size: 18px;
+            font-weight: 500;
+            color: #888;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        canvas {
+            border: 2px solid #333;
+            border-radius: 4px;
+            cursor: crosshair;
+            image-rendering: pixelated;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        button {
+            padding: 10px 28px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+
+        button:hover { background: #2a2a2a; }
+        button.primary { background: #1a3a2a; border-color: #2a5a3a; }
+        button.primary:hover { background: #2a4a3a; }
+
+        .result-section {
+            min-width: 200px;
+            padding-top: 36px;
+        }
+
+        .prediction {
+            font-size: 72px;
+            font-weight: 700;
+            text-align: center;
+            color: #4ae68a;
+            margin-bottom: 24px;
+            min-height: 90px;
+        }
+
+        .bar-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .bar-label {
+            width: 16px;
+            text-align: right;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 14px;
+            background: #1a1a1a;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: #2a5a3a;
+            border-radius: 2px;
+            transition: width 0.2s;
+        }
+
+        .bar-fill.active { background: #4ae68a; }
+
+        .bar-value {
+            width: 40px;
+            font-size: 12px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="draw-section">
+            <h1>Draw a digit</h1>
+            <canvas id="canvas" width="280" height="280"></canvas>
+            <div class="buttons">
+                <button class="primary" onclick="predict()">Predict</button>
+                <button onclick="clearCanvas()">Clear</button>
+            </div>
+        </div>
+        <div class="result-section">
+            <div class="prediction" id="prediction">-</div>
+            <div id="bars"></div>
+        </div>
+    </div>
+    <script src="/static/app.js"></script>
+</body>
+</html>
