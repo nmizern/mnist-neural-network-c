@@ -4,6 +4,59 @@
 #include <string.h>
 #include <math.h>
 
+static void nn_network_clear_optimizer_state(Network *network) {
+    if (!network) return;
+
+    if (network->adam_opts) {
+        for (size_t i = 0; i < network->num_layers; i++) {
+            if (network->adam_opts[i]) {
+                nn_adam_free(network->adam_opts[i]);
+            }
+        }
+        free(network->adam_opts);
+        network->adam_opts = NULL;
+    }
+
+    if (network->opt_gradients) {
+        for (size_t i = 0; i < network->num_layers; i++) {
+            if (network->opt_gradients[i]) {
+                free_matrix(network->opt_gradients[i]);
+            }
+        }
+        free(network->opt_gradients);
+        network->opt_gradients = NULL;
+    }
+}
+
+void nn_network_set_training_config(Network *network,
+                                    ActivationType hidden_activation,
+                                    ActivationType output_activation,
+                                    LossType loss_type,
+                                    OptimizerType optimizer_type) {
+    if (!network) return;
+
+    // Reinitialise proprement l'etat de l'optimiseur avant d'appliquer une nouvelle config.
+    nn_network_clear_optimizer_state(network);
+
+    network->hidden_activation = hidden_activation;
+    network->output_activation = output_activation;
+    network->loss_type = loss_type;
+    network->optimizer_type = optimizer_type;
+
+    if (optimizer_type == OPTIMIZER_ADAM) {
+        // Alloue l'etat Adam par couche pour conserver les moments m et v.
+        network->adam_opts = (AdamOptimizer**)calloc(network->num_layers, sizeof(AdamOptimizer*));
+        network->opt_gradients = (Matrix**)calloc(network->num_layers, sizeof(Matrix*));
+
+        for (size_t i = 0; i < network->num_layers; i++) {
+            const size_t rows = network->layers[i]->weights->rows;
+            const size_t cols = network->layers[i]->weights->cols;
+            network->adam_opts[i] = nn_adam_create(rows, cols, 0.001f, 0.9f, 0.999f, 1e-8f);
+            network->opt_gradients[i] = create_matrix(rows, cols);
+        }
+    }
+}
+
 // Création et destruction du réseau
 Network* nn_network_create(const size_t *layer_sizes, size_t num_layers) {
     Network *network = (Network*)malloc(sizeof(Network));
@@ -16,7 +69,6 @@ Network* nn_network_create(const size_t *layer_sizes, size_t num_layers) {
     for (size_t i = 0; i < network->num_layers; i++) {
         network->layers[i] = (Layer*)malloc(sizeof(Layer));
         network->layers[i]->weights = create_rndm_matrix(layer_sizes[i+1], layer_sizes[i] + 1);
-        network->layers[i]->gradients = create_matrix(layer_sizes[i+1], layer_sizes[i] + 1);
         network->layers[i]->input_cache = create_vector(layer_sizes[i]);
         network->layers[i]->output_cache = create_vector(layer_sizes[i+1]);
         network->layers[i]->bias_input = create_vector(layer_sizes[i] + 1);
@@ -35,6 +87,13 @@ Network* nn_network_create(const size_t *layer_sizes, size_t num_layers) {
     network->work_delta = create_vector(max_size);
     network->work_prev_delta = create_vector(max_size);
     network->work_act_deriv = create_vector(max_size);
+
+    network->hidden_activation = ACTIVATION_SIGMOID;
+    network->output_activation = ACTIVATION_SIGMOID;
+    network->loss_type = LOSS_MSE;
+    network->optimizer_type = OPTIMIZER_SGD;
+    network->adam_opts = NULL;
+    network->opt_gradients = NULL;
     
     return network;
 }
@@ -45,7 +104,6 @@ void nn_network_free(Network *network) {
     for (size_t i = 0; i < network->num_layers; i++) {
         if (network->layers[i]) {
             free_matrix(network->layers[i]->weights);
-            free_matrix(network->layers[i]->gradients);
             free_vector(network->layers[i]->input_cache);
             free_vector(network->layers[i]->output_cache);
             free_vector(network->layers[i]->bias_input);
@@ -59,6 +117,8 @@ void nn_network_free(Network *network) {
     free_vector(network->work_prev_delta);
     free_vector(network->work_act_deriv);
 
+    nn_network_clear_optimizer_state(network);
+
     free(network->layers);
     free(network->layer_sizes);
     free(network);
@@ -66,6 +126,7 @@ void nn_network_free(Network *network) {
 
 /* Propagation avant (zero malloc) */
 void nn_network_forward(const Network *network, const Vector *input) {
+    // La premiere couche lit directement l'entree utilisateur.
     copy_vector(input, network->layers[0]->input_cache);
 
     for (size_t i = 0; i < network->num_layers; i++) {
@@ -74,10 +135,16 @@ void nn_network_forward(const Network *network, const Vector *input) {
         memcpy(layer->bias_input->data, layer->input_cache->data, layer->input_cache->size * sizeof(float));
         layer->bias_input->data[layer->input_cache->size] = 1.0f;
 
+        // Produit matrice-vecteur puis activation selon le type de couche.
         mat_vec_mul(layer->weights, layer->bias_input, layer->output_cache);
-        nn_activation_apply(layer->output_cache, ACTIVATION_SIGMOID);
+        if (i + 1 < network->num_layers) {
+            nn_activation_apply(layer->output_cache, network->hidden_activation);
+        } else {
+            nn_activation_apply(layer->output_cache, network->output_activation);
+        }
 
         if (i + 1 < network->num_layers) {
+            // La sortie courante devient l'entree de la couche suivante.
             copy_vector(layer->output_cache, network->layers[i + 1]->input_cache);
         }
     }
@@ -92,15 +159,31 @@ void nn_network_backward(Network *network, const Vector *input, const Vector *ta
     // Calculer l'erreur de sortie: delta = loss'(predicted, target) * activation'(output)
     // Réutilisation des buffers pré-alloués: work_one_hot, work_delta, work_act_deriv
     size_t output_size = network->layers[network->num_layers - 1]->output_cache->size;
-    nn_one_hot((size_t)target->data[0], output_size, network->work_one_hot);
-    nn_loss_mse_gradient(network->layers[network->num_layers - 1]->output_cache, network->work_one_hot, network->work_delta);
+    const Vector *target_vec = target;
+    if (target->size == 1) {
+        // Convertit un label scalaire en one-hot pour les pertes multi-classes.
+        nn_one_hot((size_t)target->data[0], output_size, network->work_one_hot);
+        target_vec = network->work_one_hot;
+    }
+
+    nn_loss_gradient(network->layers[network->num_layers - 1]->output_cache, target_vec, network->work_delta, network->loss_type);
 
     // Calcul de la dérivée de l'activation pour la dernière couche (réutilise work_act_deriv)
-    nn_activation_derivative(network->layers[network->num_layers - 1]->output_cache, network->work_act_deriv, ACTIVATION_SIGMOID);
+    if (network->output_activation == ACTIVATION_SOFTMAX && network->loss_type == LOSS_CATEGORICAL_CROSS_ENTROPY) {
+        // Forme simplifiee: dL/dz = y_pred - y_true.
+        for (size_t i = 0; i < output_size; i++) {
+            network->work_delta->data[i] =
+                network->layers[network->num_layers - 1]->output_cache->data[i] - target_vec->data[i];
+        }
+    } else {
+        nn_activation_derivative(network->layers[network->num_layers - 1]->output_cache,
+                                 network->work_act_deriv,
+                                 network->output_activation);
 
-    // Multiplication élément par élément: delta = loss' * activation'
-    for (size_t i = 0; i < output_size; i++) {
-        network->work_delta->data[i] *= network->work_act_deriv->data[i];
+        // Multiplication élément par élément: delta = loss' * activation'
+        for (size_t i = 0; i < output_size; i++) {
+            network->work_delta->data[i] *= network->work_act_deriv->data[i];
+        }
     }
 
     // Ping-pong entre work_delta et work_prev_delta pour éviter tout malloc dans la boucle
@@ -110,15 +193,7 @@ void nn_network_backward(Network *network, const Vector *input, const Vector *ta
     // Rétropropagation à travers chaque couche
     for (size_t l = network->num_layers; l > 0; l--) {
         Layer *layer = network->layers[l - 1];
-
-        // layer->bias_input est déjà rempli par la passe avant: [input_cache | 1.0]
-        // On l'utilise directement pour le calcul du gradient: dW = delta * input^T
-        for (size_t i = 0; i < layer->weights->rows; i++) {
-            for (size_t j = 0; j < layer->weights->cols; j++) {
-                layer->gradients->data[i * layer->weights->cols + j] =
-                    delta->data[i] * layer->bias_input->data[j];
-            }
-        }
+        Vector *current_delta = delta;
 
         // Propager l'erreur à la couche précédente (si ce n'est pas la première couche)
         if (l > 1) {
@@ -128,12 +203,12 @@ void nn_network_backward(Network *network, const Vector *input, const Vector *ta
             for (size_t i = 0; i < prev_size; i++) {
                 next_delta->data[i] = 0.0f;
                 for (size_t j = 0; j < layer->weights->rows; j++) {
-                    next_delta->data[i] += layer->weights->data[j * layer->weights->cols + i] * delta->data[j];
+                    next_delta->data[i] += layer->weights->data[j * layer->weights->cols + i] * current_delta->data[j];
                 }
             }
 
             // Multiplier par la dérivée de l'activation de la couche précédente (réutilise work_act_deriv)
-            nn_activation_derivative(layer->input_cache, network->work_act_deriv, ACTIVATION_SIGMOID);
+            nn_activation_derivative(layer->input_cache, network->work_act_deriv, network->hidden_activation);
             for (size_t i = 0; i < prev_size; i++) {
                 next_delta->data[i] *= network->work_act_deriv->data[i];
             }
@@ -143,27 +218,35 @@ void nn_network_backward(Network *network, const Vector *input, const Vector *ta
             delta       = next_delta;
             next_delta  = tmp;
         }
-    }
 
-    // Mise à jour des poids: W = W - learning_rate * dW
-    for (size_t i = 0; i < network->num_layers; i++) {
-        Layer *layer = network->layers[i];
-        for (size_t r = 0; r < layer->weights->rows; r++) {
-            for (size_t c = 0; c < layer->weights->cols; c++) {
-                size_t idx = r * layer->weights->cols + c;
-                layer->weights->data[idx] -= learning_rate * layer->gradients->data[idx];
+        if (network->optimizer_type == OPTIMIZER_ADAM && network->adam_opts && network->opt_gradients) {
+            Matrix *grad = network->opt_gradients[l - 1];
+            network->adam_opts[l - 1]->learning_rate = learning_rate;
+
+            for (size_t i = 0; i < layer->weights->rows; i++) {
+                for (size_t j = 0; j < layer->weights->cols; j++) {
+                    grad->data[i * layer->weights->cols + j] = current_delta->data[i] * layer->bias_input->data[j];
+                }
+            }
+
+            nn_adam_update(network->adam_opts[l - 1], layer->weights, grad);
+        } else {
+            // Mise a jour SGD en ligne: W = W - lr * (delta * input^T).
+            for (size_t i = 0; i < layer->weights->rows; i++) {
+                for (size_t j = 0; j < layer->weights->cols; j++) {
+                    const size_t idx = i * layer->weights->cols + j;
+                    layer->weights->data[idx] -= learning_rate * current_delta->data[i] * layer->bias_input->data[j];
+                }
             }
         }
     }
+
     // Aucun free nécessaire
 }
 
-/* Remise à zéro des gradients */
+/* Compatibilite API: aucun gradient persistant a remettre a zero. */
 void nn_network_zero_gradients(Network *network) {
-    for (size_t i = 0; i < network->num_layers; i++) {
-        memset(network->layers[i]->gradients->data, 0, 
-               network->layers[i]->gradients->rows * network->layers[i]->gradients->cols * sizeof(float));
-    }
+    (void)network;
 }
 
 /* Prédiction */

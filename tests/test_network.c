@@ -97,27 +97,19 @@ int main(void) {
         printf("  [PASS] Prediction\n");
     }
 
-    /* Test de remise à zéro des gradients */
+    /* Test de compatibilite de nn_network_zero_gradients (no-op) */
     {
         size_t layer_sizes[] = {2, 3, 2};
         Network *net = nn_network_create(layer_sizes, 3);
 
-        for (size_t i = 0; i < net->num_layers; i++) {
-            for (size_t j = 0; j < net->layers[i]->gradients->rows * net->layers[i]->gradients->cols; j++) {
-                net->layers[i]->gradients->data[j] = 1.0f;
-            }
-        }
+        float before = net->layers[0]->weights->data[0];
 
         nn_network_zero_gradients(net);
 
-        for (size_t i = 0; i < net->num_layers; i++) {
-            for (size_t j = 0; j < net->layers[i]->gradients->rows * net->layers[i]->gradients->cols; j++) {
-                assert(float_eq(net->layers[i]->gradients->data[j], 0.0f, 0.001f));
-            }
-        }
+        assert(float_eq(net->layers[0]->weights->data[0], before, 0.001f));
 
         nn_network_free(net);
-        printf("  [PASS] Remise a zero des gradients\n");
+        printf("  [PASS] Zero gradients (no-op)\n");
     }
 
     /* Test d'entrainement rapide sur OR pour plusieurs architectures */

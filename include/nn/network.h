@@ -9,7 +9,6 @@
 /* Structure d'une couche du réseau */
 typedef struct {
     Matrix *weights;        // Poids W (biais inclus via l'astuce [W|1])
-    Matrix *gradients;      // Gradients de la couche
     Vector *input_cache;    // Entrée mise en cache pour la rétropropagation
     Vector *output_cache;   // Sortie mise en cache
     Vector *bias_input;     // Entrée concaténée avec le biais
@@ -21,7 +20,17 @@ typedef struct {
     size_t *layer_sizes;    // Tailles de chaque couche
     Layer **layers;         // Tableau de pointeurs vers les couches
 
-    // Buffers de travail pré-alloués (zéro malloc pendant l'entrainement)
+    // Configuration d'entrainement appliquee a toutes les couches du reseau.
+    ActivationType hidden_activation;
+    ActivationType output_activation;
+    LossType loss_type;
+    OptimizerType optimizer_type;
+
+    // Etat interne des optimiseurs adaptatifs (alloue seulement si necessaire).
+    AdamOptimizer **adam_opts;
+    Matrix **opt_gradients;
+
+    // Buffers de travail pre-alloues pour eviter les allocations dans la boucle d'entrainement.
     Vector *work_predicted;
     Vector *work_one_hot;
     Vector *work_delta;
@@ -38,6 +47,13 @@ void nn_network_forward(const Network *network, const Vector *input);
 
 // Rétropropagation
 void nn_network_backward(Network *network, const Vector *input, const Vector *target, float learning_rate);
+
+// Configuration de l'entrainement
+void nn_network_set_training_config(Network *network,
+                                    ActivationType hidden_activation,
+                                    ActivationType output_activation,
+                                    LossType loss_type,
+                                    OptimizerType optimizer_type);
 
 // Prédiction
 void nn_network_predict(const Network *network, const Vector *input, size_t *predicted_class);

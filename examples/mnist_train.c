@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
     const char *data_path = argv[1];
     printf("Chemin des donnees : %s\n\n", data_path);
 
+    // Essaie d'abord le cache binaire d'entrainement pour accelerer le lancement.
     char train_bin[512];
     snprintf(train_bin, sizeof(train_bin), "%s/train.bin", data_path);
 
@@ -38,6 +39,7 @@ int main(int argc, char *argv[]) {
         printf("Cache d'entrainement sauvegarde dans %s\n", train_bin);
    }
 
+    // Meme logique pour le split de test afin d'eviter de reparcourir les PNG.
     char test_bin[512];
     snprintf(test_bin, sizeof(test_bin), "%s/test.bin", data_path);
 
@@ -58,6 +60,7 @@ int main(int argc, char *argv[]) {
     }
 
     const size_t layer_sizes[4] = {784, 256, 128, 10};
+    // Architecture de base pour une premiere experience MNIST.
     Network *network = nn_network_create(layer_sizes, 4);
     nn_network_print(network);
 

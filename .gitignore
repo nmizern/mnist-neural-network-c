@@ -52,7 +52,7 @@ Thumbs.db
 # Visual Studio Solution files
 *.sln
 *.suo
-
+*.dir
 
 # Third-party libraries (download separately)
 # Keep .gitkeep but ignore actual library files
