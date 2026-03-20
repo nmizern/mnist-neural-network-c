@@ -19,8 +19,8 @@ type PredictResponse struct {
 }
 
 func main() {
-	modelPath := flag.String("model", "../examples/mnist-pngs/mnist_model.bin", "path to trained model")
-	addr := flag.String("addr", ":8080", "listen address")
+	modelPath := flag.String("model", "../data/mnist_model.bin", "path to trained model")
+	addr := flag.String("addr", ":4343", "listen address")
 	flag.Parse()
 
 	model, err := nn.LoadModel(*modelPath)

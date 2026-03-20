@@ -28,6 +28,7 @@ func LoadModel(path string) (*Network, error) {
 
 	var net Network
 
+	// least significant byte (LSB) of a multi-byte value is stored at the lowest memory address
 	if err := binary.Read(f, binary.LittleEndian, &net.NumLayers); err != nil {
 		return nil, fmt.Errorf("failed to read num_layers: %w", err)
 	}
