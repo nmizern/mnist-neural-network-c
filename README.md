@@ -7,6 +7,10 @@ https://gitlab.com/MadebyDaris/nn
 **Auteurs:** Mikita Mizerkin, Idirene Daris  
 **Cours:** TEI S6 - Projet Reseaux de neurones
 
+Example de fonctionnement de l'application
+
+![Screenshot du déliverable](./docs/image.png)
+
 ## Objectif
 
 Le projet fournit une implementation from scratch en C pour:
