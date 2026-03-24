@@ -73,6 +73,26 @@ int main(int argc, char *argv[]) {
     float accuracy = nn_network_evaluate(network, test);
     printf("Precision sur le test : %.2f%%\n", accuracy * 100.0f);
 
+    // Precision par chiffre
+    size_t correct[10] = {0};
+    size_t total[10] = {0};
+    Vector *input = create_vector(784);
+    for (size_t i = 0; i < test->count; i++) {
+        for (size_t j = 0; j < 784; j++) {
+            input->data[j] = test->images[i * 784 + j];
+        }
+        size_t predicted;
+        nn_network_predict(network, input, &predicted);
+        uint8_t label = test->labels[i];
+        total[label]++;
+        if (predicted == label) correct[label]++;
+    }
+    free_vector(input);
+    printf("\nPrecision par chiffre :\n");
+    for (int d = 0; d < 10; d++) {
+        printf("  %d : %.2f%% (%zu/%zu)\n", d, 100.0f * correct[d] / total[d], correct[d], total[d]);
+    }
+
     nn_network_free(network);
     mnist_free_dataset(train);
     mnist_free_dataset(test);

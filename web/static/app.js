@@ -48,7 +48,7 @@ canvas.addEventListener("touchend", () => { drawing = false; });
 function getPixels() {
     const srcData = ctx.getImageData(0, 0, 280, 280).data;
 
-    // find bounding box and center of mass
+    // Calcul de la boite englobante et du centre de masse
     let minX = 280, minY = 280, maxX = 0, maxY = 0;
     let massX = 0, massY = 0, totalMass = 0;
 
@@ -71,13 +71,13 @@ function getPixels() {
         return new Array(784).fill(0);
     }
 
-    // scale content to fit 20x20 area
+    // Mise a l'echelle du contenu pour tenir dans une zone 20x20
     const cropW = maxX - minX + 1;
     const cropH = maxY - minY + 1;
     const cropSize = Math.max(cropW, cropH);
     const scale = 20.0 / cropSize;
 
-    // center of mass in the cropped region, then offset to place it at (14, 14) in 28x28
+    // Centre de masse dans la region recadree, puis decalage pour le placer a (14, 14) dans 28x28
     const cmX = (massX / totalMass - minX) * scale;
     const cmY = (massY / totalMass - minY) * scale;
     const dx = 14 - cmX;
@@ -93,11 +93,18 @@ function getPixels() {
     tctx.imageSmoothingQuality = "high";
     tctx.drawImage(canvas, minX, minY, cropW, cropH, dx, dy, cropW * scale, cropH * scale);
 
-    const data = tctx.getImageData(0, 0, 28, 28).data;
+    const imgData = tctx.getImageData(0, 0, 28, 28);
+    const data = imgData.data;
     const pixels = new Float32Array(784);
     for (let i = 0; i < 784; i++) {
         pixels[i] = data[i * 4] / 255.0;
     }
+
+    // Afficher l'apercu
+    const preview = document.getElementById("preview");
+    const pctx = preview.getContext("2d");
+    pctx.putImageData(imgData, 0, 0);
+
     return Array.from(pixels);
 }
 
@@ -112,7 +119,7 @@ async function predict() {
         const result = await res.json();
         displayResult(result);
     } catch (err) {
-        console.error("Prediction failed:", err);
+        console.error("Echec de la prediction :", err);
     }
 }
 

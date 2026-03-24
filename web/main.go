@@ -25,7 +25,7 @@ func main() {
 
 	model, err := nn.LoadModel(*modelPath)
 	if err != nil {
-		log.Fatalf("Failed to load model: %v", err)
+		log.Fatalf("Echec du chargement du modele : %v", err)
 	}
 
 	gin.SetMode(gin.ReleaseMode)
@@ -41,12 +41,12 @@ func main() {
 	r.POST("/api/predict", func(c *gin.Context) {
 		var req PredictRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid request"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "requete invalide"})
 			return
 		}
 
 		if len(req.Pixels) != 784 {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "expected 784 pixels"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "784 pixels attendus"})
 			return
 		}
 
@@ -57,8 +57,8 @@ func main() {
 		})
 	})
 
-	log.Printf("Server starting on %s", *addr)
+	log.Printf("Serveur demarre sur %s", *addr)
 	if err := r.Run(*addr); err != nil {
-		log.Fatalf("Server failed: %v", err)
+		log.Fatalf("Echec du serveur : %v", err)
 	}
 }

@@ -52,7 +52,7 @@ Vector* create_rndm_vector(size_t size) {
 
 void mat_vec_mul(const Matrix* mat, Vector* vec, Vector* result) {
     if (mat->cols != vec->size || mat->rows != result->size) {
-        fprintf(stderr, "Dimension mismatch in mat_vec_mul\n");
+        fprintf(stderr, "Incompatibilité de dimensions dans mat_vec_mul\n");
         return;
     }
     for (size_t i = 0; i < mat->rows; i++) {
@@ -65,7 +65,7 @@ void mat_vec_mul(const Matrix* mat, Vector* vec, Vector* result) {
 
 void mat_mat_mul(const Matrix* A, const Matrix* B, Matrix* result) {
     if (A->cols != B->rows || A->rows != result->rows || B->cols != result->cols) {
-        fprintf(stderr, "Dimension mismatch in mat_mat_mul\n");
+        fprintf(stderr, "Incompatibilité de dimensions dans mat_mat_mul\n");
         return;
     }
     Matrix* temp = create_matrix(A->rows, B->cols);
@@ -83,7 +83,7 @@ void mat_mat_mul(const Matrix* A, const Matrix* B, Matrix* result) {
 
 float dot_product(const Vector* v1, const Vector* v2) {
     if (v1->size != v2->size) {
-        fprintf(stderr, "Dimension mismatch in dot_product\n");
+        fprintf(stderr, "Incompatibilité de dimensions dans dot_product\n");
         return 0.0f;
     }
     float result = 0.0f;
@@ -103,7 +103,7 @@ void free_vector(Vector* vec) {
 /* Opérations sur les vecteurs */
 Vector* add_vectors(const Vector* v1, const Vector* v2) {
     if (v1->size != v2->size) {
-        fprintf(stderr, "Dimension mismatch in add_vectors\n");
+        fprintf(stderr, "Incompatibilité de dimensions dans add_vectors\n");
         return NULL;
     }
     Vector* result = create_vector(v1->size);
@@ -115,7 +115,7 @@ Vector* add_vectors(const Vector* v1, const Vector* v2) {
 
 Vector* subtract_vectors(const Vector* v1, const Vector* v2) {
     if (v1->size != v2->size) {
-        fprintf(stderr, "Dimension mismatch in subtract_vectors\n");
+        fprintf(stderr, "Incompatibilité de dimensions dans subtract_vectors\n");
         return NULL;
     }
     Vector* result = create_vector(v1->size);
@@ -127,7 +127,7 @@ Vector* subtract_vectors(const Vector* v1, const Vector* v2) {
 
 Vector* multiply_vectors(const Vector* v1, const Vector* v2) {
     if (v1->size != v2->size) {
-        fprintf(stderr, "Dimension mismatch in multiply_vectors\n");
+        fprintf(stderr, "Incompatibilité de dimensions dans multiply_vectors\n");
         return NULL;
     }
     Vector* result = create_vector(v1->size);
@@ -139,7 +139,7 @@ Vector* multiply_vectors(const Vector* v1, const Vector* v2) {
 
 Vector* divide_vectors(const Vector* v1, const Vector* v2) {
     if (v1->size != v2->size) {
-        fprintf(stderr, "Dimension mismatch in divide_vectors\n");
+        fprintf(stderr, "Incompatibilité de dimensions dans divide_vectors\n");
         return NULL;
     }
     Vector* result = create_vector(v1->size);
@@ -165,7 +165,7 @@ Matrix* transpose_matrix(const Matrix* mat) {
 
 /* Utilitaires */
 void print_matrix(const Matrix* mat) {
-    printf("Matrix [%zu x %zu]:\n", mat->rows, mat->cols);
+    printf("Matrice [%zu x %zu] :\n", mat->rows, mat->cols);
     for (size_t i = 0; i < mat->rows; i++) {
         for (size_t j = 0; j < mat->cols; j++) {
             printf("%.4f ", mat->data[i * mat->cols + j]);
@@ -175,20 +175,20 @@ void print_matrix(const Matrix* mat) {
 }
 
 void print_vector(const Vector* vec) {
-    printf("Vector [%zu]: ", vec->size);
+    printf("Vecteur [%zu] : ", vec->size);
     for (size_t i = 0; i < vec->size; i++) {
         printf("%.4f ", vec->data[i]);
     }
     printf("\n");
 }
 
-void print_matrix_dimentions(const Matrix* mat) {
-    printf("Matrix dimensions: %zu x %zu\n", mat->rows, mat->cols);
+void print_matrix_dimensions(const Matrix* mat) {
+    printf("Dimensions de la matrice : %zu x %zu\n", mat->rows, mat->cols);
 }
 
 void copy_matrix(const Matrix* src, Matrix* dest) {
     if (src->rows != dest->rows || src->cols != dest->cols) {
-        fprintf(stderr, "Dimension mismatch in copy_matrix\n");
+        fprintf(stderr, "Incompatibilité de dimensions dans copy_matrix\n");
         return;
     }
     memcpy(dest->data, src->data, src->rows * src->cols * sizeof(float));
@@ -196,7 +196,7 @@ void copy_matrix(const Matrix* src, Matrix* dest) {
 
 void copy_vector(const Vector* src, Vector* dest) {
     if (src->size != dest->size) {
-        fprintf(stderr, "Dimension mismatch in copy_vector\n");
+        fprintf(stderr, "Incompatibilité de dimensions dans copy_vector\n");
         return;
     }
     memcpy(dest->data, src->data, src->size * sizeof(float));

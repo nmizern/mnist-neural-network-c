@@ -92,15 +92,15 @@ int main(int argc, char *argv[]) {
     const char *train_path = (argc > 1) ? argv[1] : DEFAULT_TRAIN_BIN;
     const char *test_path = (argc > 2) ? argv[2] : DEFAULT_TEST_BIN;
 
-    printf("MNIST CNN-style system benchmark\n");
-    printf("===============================\n");
-    printf("This compares: plain MLP vs pooled-input (CNN-style) MLP.\n");
+    printf("Benchmark systeme CNN-style MNIST\n");
+    printf("=================================\n");
+    printf("Comparaison : MLP classique vs MLP avec entree poolee (style CNN).\n");
 
     mnist_dataset_t *train = mnist_load_binary(train_path);
     mnist_dataset_t *test = mnist_load_binary(test_path);
     if (!train || !test) {
-        fprintf(stderr, "Failed to load MNIST binaries.\n");
-        fprintf(stderr, "Usage: test_mnist_cnn_system [train.bin] [test.bin]\n");
+        fprintf(stderr, "Echec du chargement des binaires MNIST.\n");
+        fprintf(stderr, "Usage : test_mnist_cnn_system [train.bin] [test.bin]\n");
         mnist_free_dataset(train);
         mnist_free_dataset(test);
         return 1;
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]) {
     const size_t test_subset = 800;
     const int epochs = 3;
 
-    printf("Subset: train=%zu, test=%zu, epochs=%d\n",
+    printf("Sous-ensemble : train=%zu, test=%zu, epoques=%d\n",
            min_size(train_subset, train->count),
            min_size(test_subset, test->count),
            epochs);
@@ -124,9 +124,9 @@ int main(int argc, char *argv[]) {
     float dense_before = eval_model(dense, test, test_subset, 0);
     float cnn_before = eval_model(cnn_style, test, test_subset, 1);
 
-    printf("\nBefore training\n");
-    printf("  Dense baseline      : %6.2f%%\n", dense_before * 100.0f);
-    printf("  CNN-style (pool 2x2): %6.2f%%\n", cnn_before * 100.0f);
+    printf("\nAvant entrainement\n");
+    printf("  Dense classique     : %6.2f%%\n", dense_before * 100.0f);
+    printf("  Style CNN (pool 2x2): %6.2f%%\n", cnn_before * 100.0f);
 
     train_model(dense, train, train_subset, 0.08f, epochs, 0);
     train_model(cnn_style, train, train_subset, 0.10f, epochs, 1);
@@ -134,15 +134,15 @@ int main(int argc, char *argv[]) {
     float dense_after = eval_model(dense, test, test_subset, 0);
     float cnn_after = eval_model(cnn_style, test, test_subset, 1);
 
-    printf("\nAfter training\n");
-    printf("  Dense baseline      : %6.2f%% (delta %+6.2f%%)\n",
+    printf("\nApres entrainement\n");
+    printf("  Dense classique     : %6.2f%% (delta %+6.2f%%)\n",
            dense_after * 100.0f,
            (dense_after - dense_before) * 100.0f);
-    printf("  CNN-style (pool 2x2): %6.2f%% (delta %+6.2f%%)\n",
+    printf("  Style CNN (pool 2x2): %6.2f%% (delta %+6.2f%%)\n",
            cnn_after * 100.0f,
            (cnn_after - cnn_before) * 100.0f);
 
-    printf("\nInterpretation: the pooled-input model is a lightweight CNN-like system for quick structural comparison.\n");
+    printf("\nInterpretation : le modele a entree poolee est un systeme leger de type CNN pour une comparaison structurelle rapide.\n");
 
     nn_network_free(dense);
     nn_network_free(cnn_style);

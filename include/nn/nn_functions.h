@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include "matrix.h"
 
-/* Types énumérés pour la modularité */
+/* Énumérations */
 typedef enum {
     LOSS_MSE,
     LOSS_MAE,
@@ -29,7 +29,7 @@ typedef enum {
     OPTIMIZER_RMSPROP
 } OptimizerType;
 
-/* Optimiseur SGD */
+/* Optimiseurs */
 typedef struct {
     float learning_rate;
     float eta;
@@ -53,7 +53,7 @@ AdamOptimizer* nn_adam_create(size_t rows, size_t cols, float learning_rate, flo
 void nn_adam_free(AdamOptimizer *opt);
 void nn_adam_update(AdamOptimizer *opt, Matrix *weights, const Matrix *gradients);
 
-/* Fonction de perte MSE */
+/* Fonctions de perte */
 float nn_loss_mse(const Vector *predicted, const Vector *target);
 void nn_loss_mse_gradient(const Vector *predicted, const Vector *target, Vector *gradient);
 float nn_loss_mae(const Vector *predicted, const Vector *target);
@@ -73,7 +73,7 @@ void nn_tanh(const Vector *input, Vector *output);
 void nn_leaky_relu(const Vector *input, Vector *output, float alpha);
 void nn_linear(const Vector *input, Vector *output);
 
-/* Dérivées */
+/* Dérivées des fonctions d'activation */
 void nn_sigmoid_derivative(const Vector *output, Vector *result);
 void nn_relu_derivative(const Vector *input, Vector *result);
 void nn_softmax_derivative(const Vector *output, Vector *result);
@@ -81,7 +81,7 @@ void nn_tanh_derivative(const Vector *output, Vector *result);
 void nn_leaky_relu_derivative(const Vector *input, Vector *result, float alpha);
 void nn_linear_derivative(const Vector *input, Vector *result);
 
-/* Application générique */
+/* Application générique des activations */
 void nn_activation_apply(Vector *vec, ActivationType type);
 void nn_activation_derivative(const Vector *vec, Vector *result, ActivationType type);
 

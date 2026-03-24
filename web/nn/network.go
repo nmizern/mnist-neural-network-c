@@ -22,41 +22,41 @@ type Network struct {
 func LoadModel(path string) (*Network, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open model: %w", err)
+		return nil, fmt.Errorf("echec de l'ouverture du modele : %w", err)
 	}
 	defer f.Close()
 
 	var net Network
 
-	// least significant byte (LSB) of a multi-byte value is stored at the lowest memory address
+	// Lecture en little-endian (octet de poids faible en premier)
 	if err := binary.Read(f, binary.LittleEndian, &net.NumLayers); err != nil {
-		return nil, fmt.Errorf("failed to read num_layers: %w", err)
+		return nil, fmt.Errorf("echec de la lecture de num_layers : %w", err)
 	}
 
 	net.LayerSizes = make([]uint64, net.NumLayers+1)
 	if err := binary.Read(f, binary.LittleEndian, &net.LayerSizes); err != nil {
-		return nil, fmt.Errorf("failed to read layer_sizes: %w", err)
+		return nil, fmt.Errorf("echec de la lecture de layer_sizes : %w", err)
 	}
 
 	net.Layers = make([]Layer, net.NumLayers)
 	for i := uint64(0); i < net.NumLayers; i++ {
 		var rows, cols uint64
 		if err := binary.Read(f, binary.LittleEndian, &rows); err != nil {
-			return nil, fmt.Errorf("failed to read layer %d dimensions: %w", i, err)
+			return nil, fmt.Errorf("echec de la lecture des dimensions de la couche %d : %w", i, err)
 		}
 		if err := binary.Read(f, binary.LittleEndian, &cols); err != nil {
-			return nil, fmt.Errorf("failed to read layer %d dimensions: %w", i, err)
+			return nil, fmt.Errorf("echec de la lecture des dimensions de la couche %d : %w", i, err)
 		}
 
 		weights := make([]float32, rows*cols)
 		if err := binary.Read(f, binary.LittleEndian, &weights); err != nil {
-			return nil, fmt.Errorf("failed to read layer %d weights: %w", i, err)
+			return nil, fmt.Errorf("echec de la lecture des poids de la couche %d : %w", i, err)
 		}
 
 		net.Layers[i] = Layer{Rows: rows, Cols: cols, Weights: weights}
 	}
 
-	fmt.Printf("Model loaded: %d layers %v\n", net.NumLayers, net.LayerSizes)
+	fmt.Printf("Modele charge : %d couches %v\n", net.NumLayers, net.LayerSizes)
 	return &net, nil
 }
 

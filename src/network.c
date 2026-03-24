@@ -149,7 +149,6 @@ void nn_network_forward(const Network *network, const Vector *input) {
         }
     }
 
-    // copy_vector(network->layers[network->num_layers - 1]->output_cache);
 }
 
 void nn_network_backward(Network *network, const Vector *input, const Vector *target, float learning_rate) {
@@ -259,7 +258,7 @@ void nn_network_predict(const Network *network, const Vector *input, size_t *pre
 void nn_network_save(const Network *network, const char *filepath) {
     FILE *file = fopen(filepath, "wb");
     if (!file) {
-        fprintf(stderr, "Failed to open file for saving: %s\n", filepath);
+        fprintf(stderr, "Echec de l'ouverture du fichier pour la sauvegarde : %s\n", filepath);
         return;
     }
     
@@ -277,13 +276,13 @@ void nn_network_save(const Network *network, const char *filepath) {
     }
     
     fclose(file);
-    printf("Network saved to %s\n", filepath);
+    printf("Reseau sauvegarde dans %s\n", filepath);
 }
 
 void nn_network_load(Network *network, const char *filepath) {
     FILE *file = fopen(filepath, "rb");
     if (!file) {
-        fprintf(stderr, "Failed to open file for loading: %s\n", filepath);
+        fprintf(stderr, "Echec de l'ouverture du fichier pour le chargement : %s\n", filepath);
         return;
     }
     
@@ -291,7 +290,7 @@ void nn_network_load(Network *network, const char *filepath) {
     size_t num_layers;
     fread(&num_layers, sizeof(size_t), 1, file);
     if (num_layers != network->num_layers) {
-        fprintf(stderr, "Network structure mismatch\n");
+        fprintf(stderr, "Incompatibilité de structure du reseau\n");
         fclose(file);
         return;
     }
@@ -309,12 +308,12 @@ void nn_network_load(Network *network, const char *filepath) {
     
     free(layer_sizes);
     fclose(file);
-    printf("Network loaded from %s\n", filepath);
+    printf("Reseau charge depuis %s\n", filepath);
 }
 
 void nn_network_copy(Network *dest, const Network *src) {
     if (dest->num_layers != src->num_layers) {
-        fprintf(stderr, "Cannot copy networks with different structures\n");
+        fprintf(stderr, "Impossible de copier des reseaux de structures differentes\n");
         return;
     }
     
@@ -325,10 +324,10 @@ void nn_network_copy(Network *dest, const Network *src) {
 
 /* Affichage du réseau */
 void nn_network_print(const Network *network) {
-    printf("Network structure:\n");
-    printf("  Layers: %zu\n", network->num_layers + 1);
+    printf("Structure du reseau :\n");
+    printf("  Couches : %zu\n", network->num_layers + 1);
     for (size_t i = 0; i <= network->num_layers; i++) {
-        printf("    Layer %zu: %zu neurons\n", i, network->layer_sizes[i]);
+        printf("    Couche %zu : %zu neurones\n", i, network->layer_sizes[i]);
     }
 }
 
@@ -365,7 +364,7 @@ void nn_network_train(Network *network, mnist_dataset_t *train_data, float learn
 
             nn_network_backward(network, input, target, learning_rate);
         }
-        printf("Epoch %d/%d complete\n", i+1, epochs);
+        printf("Epoque %d/%d terminee\n", i+1, epochs);
     }
     free_vector(input);
     free_vector(target);

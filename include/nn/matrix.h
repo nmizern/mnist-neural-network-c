@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <string.h>
 
-/* Structure de matrice pour les poids et couches du réseau */
 struct Matrix {
     size_t rows;
     size_t cols;
@@ -34,7 +33,7 @@ void free_vector(Vector* vec);
 void mat_vec_mul(const Matrix* mat, Vector* vec, Vector* result);
 void mat_mat_mul(const Matrix* A, const Matrix* B, Matrix* result);
 
-/* Opérations élémentaires */
+/* Opérations élément par élément */
 float dot_product(const Vector* v1, const Vector* v2);
 Vector* add_vectors(const Vector* v1, const Vector* v2);
 Vector* multiply_vectors(const Vector* v1, const Vector* v2);
@@ -44,7 +43,7 @@ Matrix* transpose_matrix(const Matrix* mat);
 
 /* Utilitaires */
 void print_matrix(const Matrix* mat);
-void print_matrix_dimentions(const Matrix* mat);
+void print_matrix_dimensions(const Matrix* mat);
 void print_vector(const Vector* vec);
 void copy_matrix(const Matrix* src, Matrix* dest);
 void copy_vector(const Vector* src, Vector* dest);

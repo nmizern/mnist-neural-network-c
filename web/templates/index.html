@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MNIST Digit Recognition</title>
+    <title>Reconnaissance de chiffres MNIST</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -121,11 +121,15 @@
 <body>
     <div class="container">
         <div class="draw-section">
-            <h1>Draw a digit</h1>
+            <h1>Dessinez un chiffre</h1>
             <canvas id="canvas" width="280" height="280"></canvas>
             <div class="buttons">
-                <button class="primary" onclick="predict()">Predict</button>
-                <button onclick="clearCanvas()">Clear</button>
+                <button class="primary" onclick="predict()">Predire</button>
+                <button onclick="clearCanvas()">Effacer</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:8px;">
+                <span style="color:#555;font-size:12px;">Entree du modele :</span>
+                <canvas id="preview" width="28" height="28" style="width:56px;height:56px;border:1px solid #333;border-radius:2px;"></canvas>
             </div>
         </div>
         <div class="result-section">
