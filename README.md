@@ -1,32 +1,19 @@
 # Reseau de neurones en C
 
-Bibliotheque C de reseau de neurones dense (fully connected) orientee classification MNIST.
+Bibliotheque C de reseau de neurones dense (fully connected) pour la classification MNIST, avec interface web en Go.
 
 https://gitlab.com/MadebyDaris/nn
 
-**Auteurs:** Mikita Mizerkin, Idirene Daris  
-**Cours:** TEI S6 - Projet Reseaux de neurones
+**Auteurs:** Mikita Mizerkin, Idirene Daris
+**Cours:** TEI S7 - Projet Reseaux de neurones
 
-Example de fonctionnement de l'application
-
-![Screenshot du déliverable](./docs/image.png)
-
-## Objectif
-
-Le projet fournit une implementation from scratch en C pour:
-
-1. Definir des architectures multicouches (taille variable)
-2. Executer la propagation avant (inference)
-3. Entrainer par retropropagation
-4. Evaluer sur MNIST
+![Screenshot de l'interface web](./docs/image.png)
 
 ## Prerequis
 
 - Compilateur C (GCC, Clang ou MSVC)
 - CMake 3.12+
-- libpng (lecture des images PNG MNIST)
-
-Exemples d'installation de libpng:
+- libpng
 
 ```bash
 # Ubuntu / Debian
@@ -39,7 +26,7 @@ brew install libpng
 vcpkg install libpng
 ```
 
-## Build rapide
+## Build
 
 ```bash
 mkdir build && cd build
@@ -47,86 +34,59 @@ cmake ..
 cmake --build .
 ```
 
-## Lancer les tests
+Pour un build optimise:
 
 ```bash
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --config Release
+```
+
+## Tests
+
+```bash
+cd build
 ctest --output-on-failure
 ```
 
-## Lancer un entrainement MNIST
+## Entrainement
 
-1. Recuperer le dataset PNG:
-
-```bash
-git clone https://github.com/rasbt/mnist-pngs data/mnist-pngs
-```
-
-1. Lancer un exemple:
+Le repository inclut les donnees pre-traitees (`examples/mnist-pngs/test.bin`, `mnist_model.bin`). Pour re-entrainer depuis zero, il faut le dataset PNG complet:
 
 ```bash
-./examples/mnist_train ../data/mnist-pngs
+git clone https://github.com/rasbt/mnist-pngs examples/mnist-pngs
 ```
 
-## Structure du projet
+Lancer l'entrainement:
 
-```text
-nn/
-├── include/
-│   ├── neuralnet.h
-│   └── nn/
-│       ├── matrix.h
-│       ├── mnist.h
-│       ├── network.h
-│       └── nn_functions.h
-├── src/
-│   ├── matrix.c
-│   ├── mnist.c
-│   ├── network.c
-│   └── nn_functions.c
-├── tests/
-│   └── test_*.c
-├── examples/
-│   ├── mnist_train.c
-│   ├── mnist_train_architectures.c
-│   ├── mnist_train_sigmoid_sgd_mse.c
-│   ├── mnist_train_relu_softmax_adam_cce.c
-│   └── mnist_train_tanh_softmax_sgd_cce.c
-├── web/
-│   ├── main.go
-│   ├── nn/network.go
-│   ├── templates/index.html
-│   └── static/app.js
-├── docs/
-├── CMakeLists.txt
-└── CMakePresets.json
+```bash
+./build/examples/mnist_train examples/mnist-pngs
 ```
 
-## Structure d'un reseau (dans ce projet)
+Plusieurs configurations d'entrainement sont disponibles dans `examples/`:
 
-Un reseau est defini par un tableau de tailles de couches, par exemple `{784, 256, 128, 10}`:
+| Exemple | Activation | Perte | Optimiseur |
+|---------|-----------|-------|------------|
+| `mnist_train.c` | Sigmoid | MSE | SGD |
+| `mnist_train_sigmoid_sgd_mse.c` | Sigmoid | MSE | SGD |
+| `mnist_train_relu_softmax_adam_cce.c` | ReLU / Softmax | Cross-Entropy | Adam |
+| `mnist_train_tanh_softmax_sgd_cce.c` | Tanh / Softmax | Cross-Entropy | SGD |
+| `mnist_train_architectures.c` | Sigmoid | MSE | SGD (compare plusieurs architectures) |
 
-- `784`: couche d'entree (image MNIST 28x28 aplatie)
-- `256, 128`: couches cachees
-- `10`: couche de sortie (classes 0 a 9)
+## Interface web
 
-Dans l'implementation:
+Application Go avec Gin pour dessiner et reconnaitre des chiffres en temps reel.
 
-- chaque couche stocke une matrice de poids `W` avec biais integre (colonne supplementaire)
-- la propagation avant applique `W * [x | 1]`, puis la fonction d'activation choisie
-- la retropropagation calcule les deltas et met a jour les poids via l'optimiseur configure (SGD ou Adam)
+```bash
+cd web
+go mod download
+go run . -model ../examples/mnist-pngs/mnist_model.bin -addr :4343
+```
 
-La configuration d'entrainement est parametree dans le reseau:
+Ouvrir `http://localhost:4343` dans un navigateur.
 
-- activation cachee
-- activation de sortie
-- fonction de perte
-- type d'optimiseur
+Le serveur charge le modele binaire au demarrage et effectue la propagation avant en Go pur (sans cgo). L'interface permet de dessiner un chiffre sur un canvas, le preprocessing (centrage, mise a l'echelle 28x28) est fait cote client avant l'envoi au serveur.
 
-## Utiliser la librairie pour creer et entrainer un reseau
-
-Le point d'entree C est l'en-tete `include/neuralnet.h`.
-
-Exemple minimal:
+## Utilisation de la bibliotheque
 
 ```c
 #include "neuralnet.h"
@@ -134,6 +94,7 @@ Exemple minimal:
 const size_t layers[] = {784, 256, 128, 10};
 Network *net = nn_network_create(layers, 4);
 
+// Configuration de l'entrainement
 nn_network_set_training_config(net,
                                ACTIVATION_RELU,
                                ACTIVATION_SOFTMAX,
@@ -142,77 +103,42 @@ nn_network_set_training_config(net,
 
 nn_network_train(net, train_data, 0.001f, 10);
 float acc = nn_network_evaluate(net, test_data);
-nn_network_save(net, "mnist_model.bin");
+nn_network_save(net, "model.bin");
 nn_network_free(net);
 ```
 
-Cycle typique d'utilisation:
+Activations disponibles: `SIGMOID`, `RELU`, `SOFTMAX`, `TANH`, `LEAKY_RELU`, `LINEAR`
+Fonctions de perte: `MSE`, `MAE`, `BINARY_CROSS_ENTROPY`, `CATEGORICAL_CROSS_ENTROPY`
+Optimiseurs: `SGD`, `ADAM`
 
-1. Charger les donnees MNIST (`mnist_load_dataset` ou cache binaire).
-2. Creer le reseau avec `nn_network_create`.
-3. Choisir la config d'entrainement avec `nn_network_set_training_config`.
-4. Entrainer avec `nn_network_train`.
-5. Evaluer avec `nn_network_evaluate`.
-6. Sauvegarder/charger avec `nn_network_save` et `nn_network_load`.
+## Structure du projet
 
-Pour des cas concrets, voir les programmes dans `examples/`.
-
-## Comment le web marche
-
-La partie web est une application Go independante dans `web/`.
-
-Architecture:
-
-1. `web/main.go` charge un modele binaire (`mnist_model.bin`) au demarrage.
-2. Le serveur Gin expose:
-   - `GET /` pour la page HTML
-   - `POST /api/predict` pour la prediction
-3. Le front (`templates/index.html` + `static/app.js`) permet de dessiner un chiffre sur un canvas.
-4. Le JavaScript:
-   - extrait le dessin
-   - recadre + recentre le chiffre
-   - redimensionne en 28x28
-   - normalise les pixels entre 0 et 1
-   - envoie 784 valeurs a `/api/predict`
-5. Le backend Go calcule la propagation avant et renvoie:
-   - le chiffre predit (`digit`)
-   - le vecteur de confiance (`confidence`)
-
-Lancer le web:
-
-```bash
-cd web
-go run . -model ../data/mnist_model.bin -addr :4343
 ```
-
-Puis ouvrir `http://localhost:4343`.
-
-Note de compatibilite:
-
-- le lecteur de modele Go applique actuellement une activation sigmoide sur chaque couche lors de la prediction.
-- pour des resultats coherents, utilisez de preference un modele entraine avec une configuration proche (ex: Sigmoid + SGD/MSE), ou adaptez `web/nn/network.go` pour refléter exactement la config d'entrainement du modele.
-
-## Detail des dossiers
-
-- include/: API publique du projet.
-- src/: implementation des modules (matrices, fonctions NN, reseau, loader MNIST).
-- tests/: tests unitaires de validation fonctionnelle.
-- examples/: executables de demonstration et de comparaison d'architectures/configurations.
-- web/: interface de dessin/prediction et serveur HTTP Go.
-- docs/: notes d'implementation et documentation du projet.
-
-## Variantes MNIST disponibles
-
-- mnist_train.c: baseline historique.
-- mnist_train_architectures.c: comparaison de plusieurs architectures.
-- mnist_train_sigmoid_sgd_mse.c: Sigmoid + MSE + SGD.
-- mnist_train_relu_softmax_adam_cce.c: ReLU + Softmax + CCE + Adam.
-- mnist_train_tanh_softmax_sgd_cce.c: TANH + Softmax + CCE + SGD.
+nn/
+├── include/
+│   ├── neuralnet.h            # en-tete principal
+│   └── nn/
+│       ├── matrix.h           # matrices et vecteurs
+│       ├── mnist.h            # chargement MNIST
+│       ├── network.h          # reseau de neurones
+│       └── nn_functions.h     # activations, pertes, optimiseurs
+├── src/                       # implementation
+├── examples/                  # exemples d'entrainement
+├── tests/                     # tests unitaires
+├── web/                       # interface web Go
+│   ├── main.go               # serveur Gin
+│   ├── nn/network.go         # inference en Go
+│   ├── templates/index.html  # interface canvas
+│   └── static/app.js         # logique client
+├── CMakeLists.txt
+└── CMakePresets.json
+```
 
 ## Notes techniques
 
-- Le chargement MNIST utilise un cache binaire (train.bin/test.bin) pour accelerer les relances.
-- Le module reseau permet maintenant de configurer activation, loss et optimiseur via l'API.
+- Le chargement MNIST utilise un cache binaire (`train.bin`/`test.bin`) pour accelerer les relances (quelques secondes au lieu de plusieurs minutes pour 70K PNG).
+- L'entrainement fonctionne sans allocation memoire dynamique pendant les passes avant/arriere (buffers pre-alloues).
+- L'interface web utilise un centrage par centre de masse pour le preprocessing des chiffres dessines, reproduisant le preprocessing MNIST original.
 
 ## Licence
 
