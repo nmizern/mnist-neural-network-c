@@ -2,10 +2,13 @@
 
 Bibliotheque C de reseau de neurones dense (fully connected) pour la classification MNIST, avec interface web en Go.
 
-https://gitlab.com/MadebyDaris/nn
+https://github.com/nmizern/mnist-neural-network-c
 
 **Auteurs:** Mikita Mizerkin, Idirene Daris
 **Cours:** TEI S7 - Projet Reseaux de neurones
+
+> **Projet soutenu avec succes devant la commission - note 19/20, meilleur resultat de la promotion L3 E3A.**
+> Developpe sur 10 seances de 4 heures, completees par du travail personnel a la maison.
 
 ![Screenshot de l'interface web](./docs/image.png)
 
