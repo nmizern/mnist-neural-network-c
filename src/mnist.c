@@ -152,6 +152,7 @@ void mnist_free_dataset(mnist_dataset_t *dataset) {
 }
 
 void mnist_shuffle(mnist_dataset_t *dataset) {
+    if (!dataset || dataset->count == 0) return;
     for (size_t i = dataset->count - 1; i > 0; i--) {
         size_t j = rand() % (i + 1);
         float *img_i = &dataset->images[i * MNIST_IMAGE_SIZE];
