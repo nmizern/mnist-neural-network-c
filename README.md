@@ -1,20 +1,24 @@
-# Reseau de neurones en C
+[**English**](./README.md) | [Français](./README.fr.md)
 
-Bibliotheque C de reseau de neurones dense (fully connected) pour la classification MNIST, avec interface web en Go.
+# Neural Network in C
+
+A C library for dense (fully connected) neural networks for MNIST classification, with a web interface written in Go.
 
 https://github.com/nmizern/mnist-neural-network-c
 
-**Auteurs:** Mikita Mizerkin, Idirene Daris
-**Cours:** TEI S7 - Projet Reseaux de neurones
+**Authors:** Mikita Mizerkin, Idirene Daris
 
-> **Projet soutenu avec succes devant la commission - note 19/20, meilleur resultat de la promotion L3 E3A.**
-> Developpe sur 10 seances de 4 heures, completees par du travail personnel a la maison.
+**Course:** TEI S7 - Neural Networks Project
 
-![Screenshot de l'interface web](./docs/image.png)
+> **Successfully presented to the examination committee — grade: 19/20, the best result in the L3 E3A class.**
+>
+> Developed over 10 four-hour sessions, supplemented by independent work at home.
 
-## Prerequis
+![Web interface screenshot](./docs/image.png)
 
-- Compilateur C (GCC, Clang ou MSVC)
+## Prerequisites
+
+- C compiler (GCC, Clang, or MSVC)
 - CMake 3.12+
 - libpng
 
@@ -37,7 +41,7 @@ cmake ..
 cmake --build .
 ```
 
-Pour un build optimise:
+For an optimized build:
 
 ```bash
 cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -51,33 +55,33 @@ cd build
 ctest --output-on-failure
 ```
 
-## Entrainement
+## Training
 
-Le repository inclut les donnees pre-traitees (`examples/mnist-pngs/test.bin`, `mnist_model.bin`). Pour re-entrainer depuis zero, il faut le dataset PNG complet:
+The repository includes preprocessed data (`examples/mnist-pngs/test.bin`, `mnist_model.bin`). To retrain the model from scratch, you need the complete PNG dataset:
 
 ```bash
 git clone https://github.com/rasbt/mnist-pngs examples/mnist-pngs
 ```
 
-Lancer l'entrainement:
+Start training:
 
 ```bash
 ./build/examples/mnist_train examples/mnist-pngs
 ```
 
-Plusieurs configurations d'entrainement sont disponibles dans `examples/`:
+Several training configurations are available in `examples/`:
 
-| Exemple | Activation | Perte | Optimiseur |
-|---------|-----------|-------|------------|
+| Example | Activation | Loss | Optimizer |
+|---------|------------|------|-----------|
 | `mnist_train.c` | Sigmoid | MSE | SGD |
 | `mnist_train_sigmoid_sgd_mse.c` | Sigmoid | MSE | SGD |
 | `mnist_train_relu_softmax_adam_cce.c` | ReLU / Softmax | Cross-Entropy | Adam |
 | `mnist_train_tanh_softmax_sgd_cce.c` | Tanh / Softmax | Cross-Entropy | SGD |
-| `mnist_train_architectures.c` | Sigmoid | MSE | SGD (compare plusieurs architectures) |
+| `mnist_train_architectures.c` | Sigmoid | MSE | SGD (compares several architectures) |
 
-## Interface web
+## Web Interface
 
-Application Go avec Gin pour dessiner et reconnaitre des chiffres en temps reel.
+A Go application using Gin for drawing and recognizing digits in real time.
 
 ```bash
 cd web
@@ -85,11 +89,11 @@ go mod download
 go run . -model ../examples/mnist-pngs/mnist_model.bin -addr :4343
 ```
 
-Ouvrir `http://localhost:4343` dans un navigateur.
+Open `http://localhost:4343` in a browser.
 
-Le serveur charge le modele binaire au demarrage et effectue la propagation avant en Go pur (sans cgo). L'interface permet de dessiner un chiffre sur un canvas, le preprocessing (centrage, mise a l'echelle 28x28) est fait cote client avant l'envoi au serveur.
+The server loads the binary model at startup and performs forward propagation in pure Go (without cgo). The interface lets you draw a digit on a canvas. Preprocessing (centering and scaling to 28x28) is performed on the client before the image is sent to the server.
 
-## Utilisation de la bibliotheque
+## Using the Library
 
 ```c
 #include "neuralnet.h"
@@ -97,7 +101,7 @@ Le serveur charge le modele binaire au demarrage et effectue la propagation avan
 const size_t layers[] = {784, 256, 128, 10};
 Network *net = nn_network_create(layers, 4);
 
-// Configuration de l'entrainement
+// Configure training
 nn_network_set_training_config(net,
                                ACTIVATION_RELU,
                                ACTIVATION_SOFTMAX,
@@ -110,39 +114,41 @@ nn_network_save(net, "model.bin");
 nn_network_free(net);
 ```
 
-Activations disponibles: `SIGMOID`, `RELU`, `SOFTMAX`, `TANH`, `LEAKY_RELU`, `LINEAR`
-Fonctions de perte: `MSE`, `MAE`, `BINARY_CROSS_ENTROPY`, `CATEGORICAL_CROSS_ENTROPY`
-Optimiseurs: `SGD`, `ADAM`
+Available activations: `SIGMOID`, `RELU`, `SOFTMAX`, `TANH`, `LEAKY_RELU`, `LINEAR`
 
-## Structure du projet
+Loss functions: `MSE`, `MAE`, `BINARY_CROSS_ENTROPY`, `CATEGORICAL_CROSS_ENTROPY`
+
+Optimizers: `SGD`, `ADAM`
+
+## Project Structure
 
 ```
 nn/
 ├── include/
-│   ├── neuralnet.h            # en-tete principal
+│   ├── neuralnet.h            # main header
 │   └── nn/
-│       ├── matrix.h           # matrices et vecteurs
-│       ├── mnist.h            # chargement MNIST
-│       ├── network.h          # reseau de neurones
-│       └── nn_functions.h     # activations, pertes, optimiseurs
+│       ├── matrix.h           # matrices and vectors
+│       ├── mnist.h            # MNIST loading
+│       ├── network.h          # neural network
+│       └── nn_functions.h     # activations, losses, and optimizers
 ├── src/                       # implementation
-├── examples/                  # exemples d'entrainement
-├── tests/                     # tests unitaires
-├── web/                       # interface web Go
-│   ├── main.go               # serveur Gin
-│   ├── nn/network.go         # inference en Go
-│   ├── templates/index.html  # interface canvas
-│   └── static/app.js         # logique client
+├── examples/                  # training examples
+├── tests/                     # unit tests
+├── web/                       # Go web interface
+│   ├── main.go                # Gin server
+│   ├── nn/network.go          # inference in Go
+│   ├── templates/index.html  # canvas interface
+│   └── static/app.js          # client-side logic
 ├── CMakeLists.txt
 └── CMakePresets.json
 ```
 
-## Notes techniques
+## Technical Notes
 
-- Le chargement MNIST utilise un cache binaire (`train.bin`/`test.bin`) pour accelerer les relances (quelques secondes au lieu de plusieurs minutes pour 70K PNG).
-- L'entrainement fonctionne sans allocation memoire dynamique pendant les passes avant/arriere (buffers pre-alloues).
-- L'interface web utilise un centrage par centre de masse pour le preprocessing des chiffres dessines, reproduisant le preprocessing MNIST original.
+- The MNIST loader uses a binary cache (`train.bin`/`test.bin`) to speed up subsequent runs (a few seconds instead of several minutes for 70K PNG files).
+- Training runs without dynamic memory allocation during forward and backward passes (using preallocated buffers).
+- The web interface centers drawn digits by their center of mass during preprocessing, reproducing the original MNIST preprocessing method.
 
-## Licence
+## License
 
-Projet universitaire - TEI S7.
+University project - TEI S7.
