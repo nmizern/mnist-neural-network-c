@@ -4,8 +4,6 @@
 
 A C library for dense (fully connected) neural networks for MNIST classification, with a web interface written in Go.
 
-https://github.com/nmizern/mnist-neural-network-c
-
 **Authors:** Mikita Mizerkin, Idirene Daris
 
 **Course:** TEI S7 - Neural Networks Project
@@ -16,21 +14,53 @@ https://github.com/nmizern/mnist-neural-network-c
 
 ![Web interface screenshot](./docs/image.png)
 
+## Quick Start
+
+The repository includes a trained model, so you can try the web interface without training the network first. Go 1.25 or later is required.
+
+```bash
+cd web
+go mod download
+go run . -model ../examples/mnist-pngs/mnist_model.bin -addr :4343
+```
+
+Open `http://localhost:4343` in a browser and draw a digit on the canvas.
+
+## Results
+
+The bundled model uses a `784 → 256 → 128 → 10` architecture. The project report records the following MNIST test results after five training epochs:
+
+| Architecture | Test accuracy | Time per epoch |
+|--------------|---------------|----------------|
+| `784 → 128 → 10` | 93% | 5 s |
+| `784 → 256 → 128 → 10` | 95% | 12 s |
+| `784 → 512 → 256 → 128 → 10` | 96% | 30 s |
+
+The benchmarks were measured on an Intel Core i5-12500H with 16 GB of RAM, using a single thread and an MSVC Release build. Results may vary with the training configuration and hardware.
+
+## Project Documents
+
+- [Project assignment (French)](./TEI-S7-NNv2.pdf)
+- [Project report (French)](./docs/report/index.pdf)
+
 ## Prerequisites
 
 - C compiler (GCC, Clang, or MSVC)
 - CMake 3.12+
 - libpng
+- zlib
+- Go 1.25+ (for the web interface only)
+- dirent (for MSVC builds only)
 
 ```bash
 # Ubuntu / Debian
-sudo apt-get install libpng-dev
+sudo apt-get install build-essential cmake libpng-dev zlib1g-dev
 
 # macOS
-brew install libpng
+brew install cmake libpng zlib
 
-# Windows (vcpkg)
-vcpkg install libpng
+# Windows with MSVC (vcpkg)
+vcpkg install libpng:x64-windows zlib:x64-windows dirent:x64-windows
 ```
 
 ## Build
@@ -57,16 +87,16 @@ ctest --output-on-failure
 
 ## Training
 
-The repository includes preprocessed data (`examples/mnist-pngs/test.bin`, `mnist_model.bin`). To retrain the model from scratch, you need the complete PNG dataset:
+The repository includes preprocessed test data and a trained model in `examples/mnist-pngs/`. To retrain the model from scratch, you need the complete PNG dataset:
 
 ```bash
-git clone https://github.com/rasbt/mnist-pngs examples/mnist-pngs
+git clone https://github.com/rasbt/mnist-pngs mnist-pngs
 ```
 
 Start training:
 
 ```bash
-./build/examples/mnist_train examples/mnist-pngs
+./build/examples/mnist_train mnist-pngs
 ```
 
 Several training configurations are available in `examples/`:
@@ -81,17 +111,9 @@ Several training configurations are available in `examples/`:
 
 ## Web Interface
 
-A Go application using Gin for drawing and recognizing digits in real time.
+The Go application uses Gin to recognize hand-drawn digits in real time. The server loads the binary model at startup and performs forward propagation in pure Go without cgo.
 
-```bash
-cd web
-go mod download
-go run . -model ../examples/mnist-pngs/mnist_model.bin -addr :4343
-```
-
-Open `http://localhost:4343` in a browser.
-
-The server loads the binary model at startup and performs forward propagation in pure Go (without cgo). The interface lets you draw a digit on a canvas. Preprocessing (centering and scaling to 28x28) is performed on the client before the image is sent to the server.
+The interface preprocesses each drawing in the browser by centering it and scaling it to 28x28 pixels before sending it to the server.
 
 ## Using the Library
 
@@ -124,6 +146,9 @@ Optimizers: `SGD`, `ADAM`
 
 ```
 nn/
+├── docs/
+│   ├── report/                # project report and LaTeX source
+│   └── image.png              # web interface screenshot
 ├── include/
 │   ├── neuralnet.h            # main header
 │   └── nn/
@@ -132,23 +157,20 @@ nn/
 │       ├── network.h          # neural network
 │       └── nn_functions.h     # activations, losses, and optimizers
 ├── src/                       # implementation
-├── examples/                  # training examples
-├── tests/                     # unit tests
+├── examples/                  # training examples and bundled model
+├── tests/                     # unit and integration tests
 ├── web/                       # Go web interface
 │   ├── main.go                # Gin server
 │   ├── nn/network.go          # inference in Go
 │   ├── templates/index.html  # canvas interface
 │   └── static/app.js          # client-side logic
 ├── CMakeLists.txt
-└── CMakePresets.json
+├── CMakePresets.json
+└── TEI-S7-NNv2.pdf            # project assignment
 ```
 
 ## Technical Notes
 
 - The MNIST loader uses a binary cache (`train.bin`/`test.bin`) to speed up subsequent runs (a few seconds instead of several minutes for 70K PNG files).
-- Training runs without dynamic memory allocation during forward and backward passes (using preallocated buffers).
+- Training runs without dynamic memory allocation during forward and backward passes by using preallocated buffers.
 - The web interface centers drawn digits by their center of mass during preprocessing, reproducing the original MNIST preprocessing method.
-
-## License
-
-University project - TEI S7.
